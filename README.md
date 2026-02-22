@@ -45,6 +45,9 @@ pip install resolve-mcp
 
 # Using pipx
 pipx install resolve-mcp
+
+# Install with the AI editing assistant (resolve-assistant) included
+pip install resolve-mcp[assistant]
 ```
 
 ### Configure Claude Desktop
