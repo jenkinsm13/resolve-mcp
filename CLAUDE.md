@@ -30,11 +30,11 @@ pytest tests/ -v                # run tests (no Resolve needed)
 
 ### Resolve connection
 - `get_resolve()` returns the Resolve scripting object (or `None` if not running)
-- `_boilerplate()` returns `(resolve, project, media_pool, timeline)` — raises `ValueError` with a clean message if any are missing
+- `_boilerplate()` returns `(resolve, project, media_pool)` — a **3-tuple, no timeline**. Get timeline separately: `project.GetCurrentTimeline()`
 - All Resolve API calls go through the network scripting interface
 
 ### Error handling
-- `@safe_resolve_call` decorator in `errors.py` wraps tools to catch exceptions and return MCP-friendly error strings
+- `@safe_resolve_call` decorator in `errors.py` wraps tools to catch exceptions and return MCP-friendly error strings — **including your own bugs** (`NameError`, `KeyError`, etc.), which become silent string returns instead of tracebacks
 - Custom exception classes: `ResolveNotRunning`, `ProjectNotOpen`, `TimelineNotFound`, `BinNotFound`, `ClipNotFound`, `ItemNotFound`, `StudioRequired`
 
 ### Gemini (optional)
@@ -42,6 +42,8 @@ pytest tests/ -v                # run tests (no Resolve needed)
 - Only AI bridge tools need Gemini
 - AI tools must check `if client is None: return "Error: GEMINI_API_KEY not set..."` before doing anything
 - `from google.genai import types` is imported **inside** functions that need it (not at module level)
+- **Gotcha**: If `GEMINI_API_KEY` *is* set, `config.py` constructs the Gemini client at import time. A network issue or bad key crashes the entire server, not just AI tools
+- The model (`gemini-3-flash-preview`) is a preview model — may be retired by Google without notice
 
 ### Constants
 - `VIDEO_EXTS`, `AUDIO_EXTS`, `GEMINI_MAX_BYTES`, `SAFE_CODECS`, `GEMINI_MAX_LONG_EDGE` in `config.py`
@@ -94,6 +96,24 @@ pytest tests/ -v                # run tests (no Resolve needed)
 - **15 skills** in `skills/` — user-invocable workflows (`/bump-publish`, `/deliver`, `/preflight`, etc.)
 - **Hooks** in `hooks/hooks.json` — distributed with the plugin (PreToolUse only)
 - Agent/skill files use YAML frontmatter (`name:`, `description:`, `tools:` list)
+
+## Gotchas
+
+### Resolve API
+- **`None` not `[]`**: Resolve returns `None` (not empty list) for empty collections. Always guard: `items = thing.GetClipList() or []`. This pattern appears 184 times across the codebase.
+- **All indices are 1-based**: `GetTimelineByIndex`, `GetItemListInTrack`, node indices — all 1-based. Passing 0 returns `None` silently (no error). Exception: some tools use `0` as a sentinel meaning "current" or "append at end".
+- **Clip markers use frame offsets; timeline markers use seconds**: The two marker APIs are not symmetric.
+- **`AddMarker` silently fails on duplicate frames**: Returns `False`, no exception.
+
+### Environment
+- **Resolve must be set to Network scripting**: Preferences → System → General → External scripting using = **Network**. If set to "Local", `get_resolve()` returns `None` — identical to Resolve not running.
+- **`load_dotenv()` is cwd-dependent**: If the server is launched from outside the project root (e.g., global `resolve-mcp` command), it won't find `.env`. Set `GEMINI_API_KEY` as a real env var for reliability.
+- **`RESOLVE_SCRIPT_API` env var**: Undocumented override for the Resolve scripting module path. Silently ignored if the path doesn't exist.
+- **`ffprobe` and `ffmpeg`**: Hard runtime dependencies for AI ingest/transcode tools. Not Python packages — must be on PATH. Missing `ffprobe` causes silent `None` returns in duration/timecode lookups.
+
+### Packaging
+- **agents/, skills/, hooks/ are NOT in the pip package**: Only `resolve_mcp/` Python code ships in the wheel. Agent/skill files live in the git repo only.
+- **pyproject.toml description is stale**: Says "215+" tools — actual count is ~285.
 
 ## Dev Tooling
 
