@@ -195,3 +195,37 @@ resolve_set_cdl(5,  1.0, 1.0, 1.0,  0.0, 0.0, 0.0,  1.0, 1.0, 1.0,  1.0)
 - **The FINAL node is sacred** — once set, it applies to every clip. Change it rarely.
 - **LUTs go on the last node** — never upstream of corrections
 - **Always create a version first** — the M. tree replaces whatever exists
+
+## Visual QA — Claude Reviews the Grade Directly
+
+Claude is multimodal. After applying a grade, export a frame and look at it.
+
+```
+QA Loop:
+  1. Set playhead to a representative frame:
+     resolve_set_playhead(frame)
+
+  2. Export as sRGB PNG (critical — not EXR/DPX):
+     resolve_export_frame("C:/Users/micha/resolve_qa/grade_check.png")
+
+  3. Read the image directly with the Read tool
+     → Claude sees the graded frame and evaluates:
+       - Stage 1 (BALANCE): Is the image properly balanced?
+       - Stage 2 (CONTRAST): Appropriate contrast for the content?
+       - Stage 3 (LOCAL): Do qualifiers look invisible/natural?
+       - Stage 4 (LOOK): Does the preset look match expectations?
+       - Stage 5 (FINAL): Is the finishing node doing its job?
+       - Skin tones: natural and protected through the pipeline?
+       - Data preservation: is there detail in shadows AND highlights?
+
+  4. Adjust CDL values on specific stage nodes if needed:
+     resolve_set_cdl(node, ...)
+
+  5. Re-export and re-check
+
+  6. Grab a reference still once approved:
+     resolve_grab_still()
+```
+
+Check one hero frame per scene minimum. Always check skin tone close-ups.
+Export as PNG only — sRGB gamma is what Claude's vision expects.

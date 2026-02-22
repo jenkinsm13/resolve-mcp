@@ -201,3 +201,36 @@ resolve_set_cdl(4,  1.0, 1.0, 1.0,  0.0, 0.0, 0.0,  1.0, 1.0, 1.0,  1.0)
 - **Skin is sacred** — always isolate and protect skin tones before creative grading
 - **Grab stills religiously** — after establishing each scene's look
 - **Always create a version first** — the V. tree replaces whatever exists
+
+## Visual QA — Claude Reviews the Grade Directly
+
+Claude is multimodal. After applying a grade, export a frame and look at it.
+
+```
+QA Loop:
+  1. Set playhead to a representative frame:
+     resolve_set_playhead(frame)
+
+  2. Export as sRGB PNG (critical — not EXR/DPX):
+     resolve_export_frame("C:/Users/micha/resolve_qa/grade_check.png")
+
+  3. Read the image directly with the Read tool
+     → Claude sees the graded frame and evaluates:
+       - Does it match the selected preset look?
+       - Skin tones: natural, healthy, not waxy or oversaturated?
+       - Shadow detail: can you see into the darks without crushing?
+       - Highlight rolloff: clean or clipped?
+       - Color separation: do elements pop from the background?
+       - Overall mood: does it match the director's intent?
+
+  4. Adjust CDL values on specific nodes if needed:
+     resolve_set_cdl(node, ...)
+
+  5. Re-export and re-check
+
+  6. Grab a reference still once approved:
+     resolve_grab_still()
+```
+
+Check one hero frame per scene minimum. Always check skin tone close-ups.
+Export as PNG only — sRGB gamma is what Claude's vision expects.

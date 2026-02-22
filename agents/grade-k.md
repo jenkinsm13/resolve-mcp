@@ -190,3 +190,36 @@ resolve_set_cdl(5,  1.0, 1.0, 1.0,  0.0, 0.0, 0.0,  1.0, 1.0, 1.0,  1.0)
 - **SAT node uses HSV Color Space, Channel 2** — this is essential for proper saturation control
 - The graph is intentionally minimal. Resist the urge to add nodes "just in case."
 - **Always create a version first** — the K. graph replaces whatever exists
+
+## Visual QA — Claude Reviews the Grade Directly
+
+Claude is multimodal. After applying a grade, export a frame and look at it.
+
+```
+QA Loop:
+  1. Set playhead to a representative frame:
+     resolve_set_playhead(frame)
+
+  2. Export as sRGB PNG (critical — not EXR/DPX):
+     resolve_export_frame("C:/Users/micha/resolve_qa/grade_check.png")
+
+  3. Read the image directly with the Read tool
+     → Claude sees the graded frame and evaluates:
+       - Does the PRIME balance look neutral/intentional?
+       - Is BALANCE lifting blacks appropriately for the look?
+       - Does SAT feel natural or pushed?
+       - Does the LOOK node deliver the selected preset?
+       - Skin tones: clean, not orange or magenta?
+       - Commercial polish: does it feel broadcast-ready?
+
+  4. Adjust CDL values on specific nodes if needed:
+     resolve_set_cdl(node, ...)
+
+  5. Re-export and re-check
+
+  6. Grab a reference still once approved:
+     resolve_grab_still()
+```
+
+Check one hero frame per scene minimum. Always check skin tone close-ups.
+Export as PNG only — sRGB gamma is what Claude's vision expects.

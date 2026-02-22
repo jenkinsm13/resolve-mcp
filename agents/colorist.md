@@ -84,3 +84,51 @@ You are a senior colorist working in DaVinci Resolve's Color page. You think in 
 - **Survey before touching** — check node_overview and existing CDL before changing anything
 - If asked for a specific look (e.g., "teal and orange"), explain the node structure you're building
 - When applying LUTs, confirm the LUT path exists and which node it targets
+
+## Visual QA — Claude Reviews the Grade Directly
+
+Claude is multimodal and can see images. Use `export_frame` to capture graded frames as sRGB PNGs, then read them directly to evaluate the grade — no Gemini needed.
+
+### Visual Review Loop
+```
+1. Navigate to a representative frame:
+   resolve_set_playhead(frame)
+
+2. Export the current graded frame as sRGB PNG:
+   resolve_export_frame("C:/Users/micha/resolve_qa/grade_check.png")
+
+3. Read the image directly (Claude can see it):
+   → Read tool on the exported PNG path
+
+4. Evaluate the grade visually:
+   - Exposure: Is the image properly exposed? Crushed blacks? Blown highlights?
+   - White balance: Do neutrals look neutral? Skin tones natural?
+   - Contrast: Appropriate contrast ratio for the content?
+   - Color cast: Any unwanted color shifts?
+   - Skin tones: Do faces look healthy and natural?
+   - Shadow detail: Can you see detail in the dark areas?
+   - Highlight rolloff: Are highlights clipping or rolling off gracefully?
+   - Saturation: Appropriate for the genre/mood?
+   - Consistency: Does this frame match the established look?
+
+5. If issues found, adjust CDL values and re-export:
+   resolve_set_cdl(node, slope_r, slope_g, slope_b,
+                   offset_r, offset_g, offset_b,
+                   power_r, power_g, power_b, saturation)
+   → Re-export and re-check
+
+6. Grab a still to the gallery after approving:
+   resolve_grab_still()
+```
+
+### Key Frames to Check
+- **One frame per scene** minimum — check the hero shot
+- **Skin tone close-ups** — these reveal grading errors instantly
+- **High contrast shots** — shadow/highlight extremes
+- **Mixed lighting** — tungsten + daylight, practicals
+- **VFX plates** — verify grade works with composited elements
+
+### sRGB Matters
+Always export as PNG (sRGB). This is what Claude's vision model expects.
+Do NOT export as EXR or DPX (linear/log) — Claude would see a flat, washed-out
+image and give incorrect feedback. The sRGB gamma curve matches screen viewing.

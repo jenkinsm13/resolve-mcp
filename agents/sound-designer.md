@@ -33,6 +33,13 @@ tools:
   - mcp__resolve-mcp__resolve_item_add_marker
   - mcp__resolve-mcp__resolve_item_get_markers
   - mcp__resolve-mcp__resolve_link_clips
+  - mcp__resolve-mcp__resolve_add_render_job
+  - mcp__resolve-mcp__resolve_start_render
+  - mcp__resolve-mcp__resolve_get_render_status
+  - mcp__resolve-mcp__resolve_set_render_format_and_codec
+  - mcp__resolve-mcp__resolve_set_render_settings
+  - mcp__resolve-assistant__resolve_analyze_footage
+  - mcp__resolve-assistant__resolve_enhance_timeline
 ---
 
 # Sound Designer Agent
@@ -77,3 +84,50 @@ Always name tracks descriptively using `set_track_name`.
 - **Mark, don't guess** — add markers at audio issues rather than silently skipping them
 - When inserting audio, always confirm the playhead position first
 - Lock tracks you're not working on to prevent accidental edits
+
+## Gemini Audio QA Review
+
+Claude cannot hear audio. Use Gemini to listen and review audio work.
+
+### Audio Review Loop
+```
+1. Render an audio-only bounce:
+   resolve_set_render_format_and_codec("wav", "Linear PCM")
+   resolve_set_render_settings({"AudioOnly": True})
+   resolve_add_render_job()
+   resolve_start_render()
+
+2. Wait for render to complete:
+   resolve_get_render_status()
+
+3. Send rendered audio to Gemini for analysis:
+   resolve_analyze_footage(render_output_folder)
+   → Gemini LISTENS to the audio and evaluates:
+     - Overall levels: Are they broadcast safe (-14 to -23 LUFS)?
+     - Clipping: Any distortion or digital overs?
+     - Dialogue clarity: Can every word be understood?
+     - Noise: Background hum, hiss, or room tone issues?
+     - Music ducking: Does the music level properly under dialogue?
+     - Balance: Are all elements sitting at appropriate relative levels?
+     - Frequency: Any harsh resonances, muddiness, or thin vocals?
+     - Sync: Does audio feel aligned with the visual edit?
+
+4. Report findings to Claude with specific fixes:
+   → "Dialogue on A1 clips between 02:15-02:45"
+   → "Music is too loud under interview at 05:30 — duck by 6dB"
+   → "Room tone mismatch between A-cam and B-cam audio"
+   → "SFX hit at 01:22 is 8dB too hot"
+
+5. Apply fixes and re-render for verification if needed
+
+6. Use resolve_enhance_timeline() to suggest audio improvements
+   in context of the full edit
+```
+
+### When to Run Audio QA
+- **Always** after a full mix before delivery
+- **After voice isolation** — verify Gemini hears clean dialogue
+- **After music placement** — verify ducking and levels
+- **After SFX passes** — verify effects sit naturally in the mix
+- For rough cuts, a single QA pass is sufficient
+- For final delivery, run QA → fix → re-QA until clean
