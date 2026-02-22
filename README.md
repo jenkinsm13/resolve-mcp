@@ -421,13 +421,15 @@ Once configured, just talk to your AI assistant naturally:
 
 This repo is also a **Claude Code plugin** that installs 13 editor-focused skills, 3 specialized agents, and safety hooks directly into Claude Code.
 
-### Install the Plugin
+### Install Everything With One Command
 
 ```bash
 claude plugin add github.com/jenkinsm13/resolve-mcp
 ```
 
-This gives you slash commands for common editing workflows that pair with the 215+ MCP tools:
+This installs the **MCP server** (215+ tools) AND all skills, agents, and hooks in one step. No separate MCP configuration needed — the plugin bundles it all.
+
+> **Note:** Set your `GEMINI_API_KEY` in the MCP server config after install if you want the AI bridge tools. The 215+ Resolve tools work without it.
 
 ### Skills (invoke with `/skill-name`)
 
@@ -460,7 +462,7 @@ This gives you slash commands for common editing workflows that pair with the 21
 - **`.env` protection** — blocks editing of `.env` files containing API keys
 - **Destructive operation warning** — warns before delete operations in Resolve (clips, timelines, grades, markers, bins, projects)
 
-> **Note:** The plugin installs skills/agents/hooks into Claude Code. The MCP server (215+ tools) still needs to be installed separately via `uvx resolve-mcp` or `pip install resolve-mcp`.
+> **Note:** The plugin bundles both the MCP server and all skills/agents/hooks. For standalone MCP server install (without skills), use `uvx resolve-mcp` or `pip install resolve-mcp`.
 
 ---
 
