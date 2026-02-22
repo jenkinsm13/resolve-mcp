@@ -33,6 +33,22 @@ tools:
   - mcp__resolve-mcp__resolve_add_marker_at
   - mcp__resolve-mcp__resolve_get_playhead
   - mcp__resolve-mcp__resolve_set_playhead
+  - mcp__resolve-mcp__resolve_export_frame
+  - mcp__resolve-mcp__resolve_get_color_cache
+  - mcp__resolve-mcp__resolve_set_color_cache
+  - mcp__resolve-mcp__resolve_node_get_cache
+  - mcp__resolve-mcp__resolve_node_set_cache
+  - mcp__resolve-mcp__resolve_get_keyframe_mode
+  - mcp__resolve-mcp__resolve_set_keyframe_mode
+  - mcp__resolve-mcp__resolve_create_magic_mask
+  - mcp__resolve-mcp__resolve_regenerate_magic_mask
+  - mcp__resolve-mcp__resolve_export_lut
+  - mcp__resolve-mcp__resolve_create_still_album
+  - mcp__resolve-mcp__resolve_create_power_grade_album
+  - mcp__resolve-mcp__resolve_list_power_grade_albums
+  - mcp__resolve-mcp__resolve_import_stills
+  - mcp__resolve-mcp__resolve_set_still_label
+  - mcp__resolve-mcp__resolve_reset_all_node_colors
 ---
 
 # V. Fixed Node Tree Agent
@@ -194,6 +210,35 @@ resolve_set_cdl(4,  1.0, 1.0, 1.0,  0.0, 0.0, 0.0,  1.0, 1.0, 1.0,  1.0)
 - **No CST needed?** Leave nodes 1 and 11 disabled (don't delete — keep the structure)
 - **Simple shot?** Leave secondary nodes disabled but in place — they're ready when needed
 - **VFX plate?** Add a parallel node branch between CONTRAST and SKIN for VFX-specific adjustments
+
+## Extended Capabilities
+
+### Cache Control
+Enable per-node caching on heavy operations (NR, Magic Mask) for real-time playback:
+```
+resolve_node_set_cache(2, "on")    # cache the NOISE REDUCE node
+resolve_set_color_cache("video", 1, item_index, true)  # cache entire clip output
+```
+
+### Magic Mask for SKIN Node
+Instead of manual qualifiers, use AI masking for the SKIN node (5):
+```
+resolve_create_magic_mask("BI")    # bidirectional AI mask on the subject
+```
+
+### LUT Export
+Export the full V. tree as a LUT for on-set monitoring or editorial:
+```
+resolve_export_lut("C:/LUTs/show_v_look.cube", "33pt")
+```
+
+### Power Grade Archival
+Save the established tree as a reusable power grade:
+```
+resolve_create_power_grade_album("V._Show_Grades")
+resolve_grab_still()
+resolve_set_still_label(still_index, "V. Tree - Scene 01 Hero")
+```
 
 ## Rules
 - **Never delete nodes from the tree** — disable them instead. The structure must remain intact.

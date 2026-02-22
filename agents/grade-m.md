@@ -31,6 +31,22 @@ tools:
   - mcp__resolve-mcp__resolve_add_marker_at
   - mcp__resolve-mcp__resolve_get_playhead
   - mcp__resolve-mcp__resolve_set_playhead
+  - mcp__resolve-mcp__resolve_export_frame
+  - mcp__resolve-mcp__resolve_get_color_cache
+  - mcp__resolve-mcp__resolve_set_color_cache
+  - mcp__resolve-mcp__resolve_node_get_cache
+  - mcp__resolve-mcp__resolve_node_set_cache
+  - mcp__resolve-mcp__resolve_get_keyframe_mode
+  - mcp__resolve-mcp__resolve_set_keyframe_mode
+  - mcp__resolve-mcp__resolve_create_magic_mask
+  - mcp__resolve-mcp__resolve_regenerate_magic_mask
+  - mcp__resolve-mcp__resolve_export_lut
+  - mcp__resolve-mcp__resolve_create_still_album
+  - mcp__resolve-mcp__resolve_create_power_grade_album
+  - mcp__resolve-mcp__resolve_list_power_grade_albums
+  - mcp__resolve-mcp__resolve_import_stills
+  - mcp__resolve-mcp__resolve_set_still_label
+  - mcp__resolve-mcp__resolve_reset_all_node_colors
 ---
 
 # Juan M. Node Structure Agent
@@ -188,6 +204,34 @@ resolve_set_cdl(5,  1.0, 1.0, 1.0,  0.0, 0.0, 0.0,  1.0, 1.0, 1.0,  1.0)
 - **Complex shot**: Stage 3 can expand to more parallel nodes for overlapping qualifiers
 - **LUT-based look**: Place the LUT in Stage 4 (LOOK) or Stage 5 (FINAL), never earlier
 - **Color managed**: Add CST IN before Stage 1 and CST OUT after Stage 5 (see Step 5)
+
+## Extended Capabilities
+
+### Cache Control
+Cache heavy nodes for real-time playback during grading:
+```
+resolve_node_set_cache(SKIN_INDEX, "on")   # cache qualifier work
+resolve_set_color_cache("video", 1, item_index, true)
+```
+
+### Magic Mask for Stage 3 (LOCAL COLOR)
+Use AI masking as an alternative to manual qualifiers on SKIN or SKY parallel nodes:
+```
+resolve_create_magic_mask("BI")
+```
+
+### LUT Export
+Export the M. 5-stage pipeline as a reusable LUT:
+```
+resolve_export_lut("C:/LUTs/show_m_look.cube", "33pt")
+```
+
+### Power Grade Archival
+```
+resolve_create_power_grade_album("M._Show_Grades")
+resolve_grab_still()
+resolve_set_still_label(still_index, "M. 5-Stage - Documentary Natural v1")
+```
 
 ## Rules
 - **Balance first, always** — never apply a look to an unbalanced image

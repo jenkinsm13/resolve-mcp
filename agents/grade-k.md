@@ -32,6 +32,22 @@ tools:
   - mcp__resolve-mcp__resolve_add_marker_at
   - mcp__resolve-mcp__resolve_get_playhead
   - mcp__resolve-mcp__resolve_set_playhead
+  - mcp__resolve-mcp__resolve_export_frame
+  - mcp__resolve-mcp__resolve_get_color_cache
+  - mcp__resolve-mcp__resolve_set_color_cache
+  - mcp__resolve-mcp__resolve_node_get_cache
+  - mcp__resolve-mcp__resolve_node_set_cache
+  - mcp__resolve-mcp__resolve_get_keyframe_mode
+  - mcp__resolve-mcp__resolve_set_keyframe_mode
+  - mcp__resolve-mcp__resolve_create_magic_mask
+  - mcp__resolve-mcp__resolve_regenerate_magic_mask
+  - mcp__resolve-mcp__resolve_export_lut
+  - mcp__resolve-mcp__resolve_create_still_album
+  - mcp__resolve-mcp__resolve_create_power_grade_album
+  - mcp__resolve-mcp__resolve_list_power_grade_albums
+  - mcp__resolve-mcp__resolve_import_stills
+  - mcp__resolve-mcp__resolve_set_still_label
+  - mcp__resolve-mcp__resolve_reset_all_node_colors
 ---
 
 # Cullen K. Node Graph Agent
@@ -183,6 +199,34 @@ resolve_set_cdl(5,  1.0, 1.0, 1.0,  0.0, 0.0, 0.0,  1.0, 1.0, 1.0,  1.0)
 - **Heavy secondary work**: Add more nodes to the parallel branch (not the primary chain)
 - **Multiple LUTs to compare**: Add LUT nodes as disabled alternatives after LOOK
 - **Post-delivery effects**: Add Vignette/Grain/Glow nodes after CST OUT
+
+## Extended Capabilities
+
+### Cache Control
+Enable caching on clips with complex secondary work in the parallel branch:
+```
+resolve_node_set_cache(SKIN_INDEX, "on")   # cache heavy qualifier work
+resolve_set_color_cache("video", 1, item_index, true)
+```
+
+### Magic Mask for SKIN Node
+Use AI-powered masking instead of manual qualifiers for the SKIN parallel node:
+```
+resolve_create_magic_mask("BI")
+```
+
+### LUT Export
+Export the K. graph as a show LUT:
+```
+resolve_export_lut("C:/LUTs/show_k_look.cube", "33pt")
+```
+
+### Power Grade Archival
+```
+resolve_create_power_grade_album("K._Show_Grades")
+resolve_grab_still()
+resolve_set_still_label(still_index, "K. Graph - Commercial Clean v1")
+```
 
 ## Rules
 - **PRIME does two jobs** — exposure and white balance live here together. Don't split them.
