@@ -9,6 +9,15 @@
             "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '\\.env\"|\\.env$'; then echo 'BLOCKED: Do not edit .env files — they contain API keys' >&2; exit 1; fi"
           }
         ]
+      },
+      {
+        "matcher": "mcp__resolve-mcp__resolve_delete_clips|mcp__resolve-mcp__resolve_delete_timelines|mcp__resolve-mcp__resolve_delete_clips_from_timeline|mcp__resolve-mcp__resolve_reset_grades|mcp__resolve-mcp__resolve_delete_markers|mcp__resolve-mcp__resolve_delete_track|mcp__resolve-mcp__resolve_delete_bins|mcp__resolve-mcp__resolve_delete_stills|mcp__resolve-mcp__resolve_delete_render_job|mcp__resolve-mcp__resolve_delete_all_render_jobs|mcp__resolve-mcp__resolve_delete_project",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '⚠️  DESTRUCTIVE: This will delete data in DaVinci Resolve that cannot be undone. Confirm with the user before proceeding.' >&2"
+          }
+        ]
       }
     ],
     "PostToolUse": [
