@@ -1,6 +1,15 @@
 # resolve-mcp
 
-MCP server exposing 285+ tools for the DaVinci Resolve scripting API (v20.3), plus AI bridge tools powered by Google Gemini.
+MCP server exposing ~285 tools for the DaVinci Resolve scripting API (v20.3), plus AI bridge tools powered by Google Gemini.
+
+## Quick Start
+
+```bash
+pip install -e ".[dev]"         # install package + ruff/pytest/pyright
+cp .env.example .env            # optional — only needed for AI bridge tools
+resolve-mcp                     # run the MCP server (needs Resolve open)
+pytest tests/ -v                # run tests (no Resolve needed)
+```
 
 ## Architecture
 
@@ -16,6 +25,8 @@ MCP server exposing 285+ tools for the DaVinci Resolve scripting API (v20.3), pl
 2. Import `from .config import mcp` and `from .resolve import get_resolve, _boilerplate`
 3. Decorate with `@mcp.tool`
 4. If the module is new, add `from . import my_new_tools` in `__init__.py`
+
+**Gotcha — cascading imports**: 18 modules are loaded *indirectly* through import chains rather than `__init__.py`. For example, `edit_tools.py` imports `clip_edit_tools`, which imports `clip_query_tools`. If you add tools to one of these indirect modules, they'll register correctly without touching `__init__.py` — but only because the parent module already imports them. See `tests/test_conventions.py::INDIRECT_IMPORT_MODULES` for the full list.
 
 ### Resolve connection
 - `get_resolve()` returns the Resolve scripting object (or `None` if not running)
@@ -74,6 +85,15 @@ MCP server exposing 285+ tools for the DaVinci Resolve scripting API (v20.3), pl
 | `audio_mapping_tools.py` | 2 | Audio channel mapping inspection |
 | `timeline_extras.py` | 17 | Timecodes, linked items, LUT export |
 | `resolve_tools.py` | 9 | AI bridge tools (Gemini) |
+
+> **Note**: 18 additional modules are loaded indirectly via import chains from the modules above. See `tests/test_conventions.py::INDIRECT_IMPORT_MODULES` for the complete list.
+
+## Agents & Skills
+
+- **25 agents** in `agents/` — domain-specific Claude subagents (colorist, editor, VFX, etc.)
+- **15 skills** in `skills/` — user-invocable workflows (`/bump-publish`, `/deliver`, `/preflight`, etc.)
+- **Hooks** in `hooks/hooks.json` — distributed with the plugin (PreToolUse only)
+- Agent/skill files use YAML frontmatter (`name:`, `description:`, `tools:` list)
 
 ## Dev Tooling
 
