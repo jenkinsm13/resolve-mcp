@@ -1,6 +1,6 @@
 """
 resolve_mcp — MCP server for DaVinci Resolve scripting API.
-296 tools covering the full Resolve API (v20.3) plus AI-enhanced editing tools.
+298 tools covering the full Resolve API (v20.3) plus AI-enhanced editing tools.
 """
 
 from .config import mcp  # noqa: F401 — re-export for entry points
@@ -44,6 +44,7 @@ from . import (
     project_tools,  # noqa: F401  — project/DB management (10 tools)
     quick_export_tools,  # noqa: F401  — Quick Export presets & render (2 tools)
     render_tools,  # noqa: F401  — render/deliver pipeline (14 tools)
+    resolve_agent_tools,  # noqa: F401  — Gemini agent editing sessions (2 tools)
     resolve_tools,  # noqa: F401  — AI-driven Resolve tools (9 tools)
     resources,  # noqa: F401  — resolve://project, timelines, bins, etc.
     take_tools,  # noqa: F401  — take selector management (7 tools)
