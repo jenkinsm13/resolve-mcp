@@ -28,7 +28,9 @@ tools:
   - mcp__resolve-mcp__resolve_get_current_render_settings
   - mcp__resolve-mcp__resolve_set_render_format_and_codec
   - mcp__resolve-mcp__resolve_export_timeline
+  - mcp__resolve-mcp__resolve_import_timeline_from_file
   - mcp__resolve-mcp__resolve_export_metadata
+  - mcp__resolve-mcp__resolve_duplicate_timeline
   - mcp__resolve-mcp__resolve_list_timelines
   - mcp__resolve-mcp__resolve_set_current_timeline
   - mcp__resolve-mcp__resolve_list_markers
@@ -79,6 +81,26 @@ For projects needing multiple deliverables (e.g., broadcast master + web proxy +
 1. Set up each format's render settings
 2. Add each as a separate render job
 3. Start all jobs — Resolve renders them sequentially
+
+### Timeline Import for Conform
+When receiving an edit from another NLE (Premiere, Avid, FCP):
+```
+1. Import the edit decision list:
+   resolve_import_timeline_from_file(file_path, import_options)
+   → Supports: AAF, EDL, XML, FCPXML, OTIO
+
+2. Verify the conform:
+   - Check resolve_list_clips_on_track for all tracks
+   - Look for offline (red) clips that need relinking
+   - Verify frame count matches editorial
+
+3. If clips are offline:
+   - Use resolve_relink_clips to point to camera originals
+   - Or import media first, then re-import the timeline
+
+4. Duplicate the conformed timeline as a safety backup:
+   resolve_duplicate_timeline("conform_backup")
+```
 
 ### Timeline Export for Interchange
 - **AAF**: For roundtripping with Avid Media Composer

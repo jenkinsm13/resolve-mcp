@@ -46,9 +46,11 @@ tools:
   - mcp__resolve-mcp__resolve_insert_audio_at_playhead
   - mcp__resolve-mcp__resolve_auto_sync_audio
   - mcp__resolve-mcp__resolve_get_audio_track_info
+  - mcp__resolve-mcp__resolve_duplicate_timeline
   - mcp__resolve-assistant__resolve_analyze_footage
   - mcp__resolve-assistant__resolve_build_timeline
   - mcp__resolve-assistant__resolve_analyze_timeline
+  - mcp__resolve-assistant__resolve_enhance_timeline
 ---
 
 # Documentary Editor Agent

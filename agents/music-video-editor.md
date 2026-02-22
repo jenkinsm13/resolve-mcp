@@ -45,6 +45,9 @@ tools:
   - mcp__resolve-mcp__resolve_create_compound_clip
   - mcp__resolve-mcp__resolve_import_media
   - mcp__resolve-mcp__resolve_insert_audio_at_playhead
+  - mcp__resolve-mcp__resolve_duplicate_timeline
+  - mcp__resolve-mcp__resolve_detect_scene_cuts
+  - mcp__resolve-mcp__resolve_get_audio_track_info
   - mcp__resolve-assistant__resolve_analyze_footage
   - mcp__resolve-assistant__resolve_build_timeline
   - mcp__resolve-assistant__resolve_enhance_timeline

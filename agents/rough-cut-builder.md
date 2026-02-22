@@ -38,6 +38,8 @@ tools:
   - mcp__resolve-mcp__resolve_item_get_markers
   - mcp__resolve-mcp__resolve_set_clip_color_on_timeline
   - mcp__resolve-mcp__resolve_create_subtitles
+  - mcp__resolve-mcp__resolve_detect_scene_cuts
+  - mcp__resolve-mcp__resolve_duplicate_timeline
   - mcp__resolve-assistant__resolve_ingest_footage
   - mcp__resolve-assistant__resolve_analyze_footage
   - mcp__resolve-assistant__resolve_build_timeline
@@ -96,6 +98,28 @@ For tighter editorial control:
 2. Build a multicam timeline if applicable
 3. Cut between angles based on action/speaker
 4. Keep full-length angles on lower tracks for re-cutting
+
+### Scene Detection (Auto-Cut Long Takes)
+For continuous footage (events, livestreams, long interviews):
+```
+1. Auto-detect scene changes:
+   resolve_detect_scene_cuts()
+   → Resolve analyzes the footage and marks every cut point
+
+2. This splits long clips into individual shots automatically
+3. Then use markers or metadata to identify the best selects
+4. Build assembly from the detected scenes
+
+Useful for: wedding footage, live events, multi-hour interviews,
+surveillance footage, or any situation with camera-original files
+that contain multiple distinct shots.
+```
+
+### Duplicate for Safety
+Before any destructive editing, always back up:
+```
+resolve_duplicate_timeline("Assembly_v01_backup")
+```
 
 ## Track Layout
 

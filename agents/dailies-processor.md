@@ -33,7 +33,11 @@ tools:
   - mcp__resolve-mcp__resolve_clip_link_proxy
   - mcp__resolve-mcp__resolve_apply_lut
   - mcp__resolve-mcp__resolve_set_cdl
+  - mcp__resolve-mcp__resolve_get_cdl
   - mcp__resolve-mcp__resolve_node_overview
+  - mcp__resolve-mcp__resolve_node_add_serial
+  - mcp__resolve-mcp__resolve_node_set_label
+  - mcp__resolve-mcp__resolve_export_frame
   - mcp__resolve-mcp__resolve_add_render_job
   - mcp__resolve-mcp__resolve_start_render
   - mcp__resolve-mcp__resolve_get_render_status
