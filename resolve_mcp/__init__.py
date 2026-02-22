@@ -1,6 +1,6 @@
 """
 resolve_mcp — MCP server for DaVinci Resolve scripting API.
-285 tools covering the full Resolve API (v20.3) plus AI-enhanced editing tools.
+296 tools covering the full Resolve API (v20.3) plus AI-enhanced editing tools.
 """
 
 from .config import mcp  # noqa: F401 — re-export for entry points

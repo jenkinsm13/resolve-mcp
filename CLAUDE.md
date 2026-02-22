@@ -1,6 +1,6 @@
 # resolve-mcp
 
-MCP server exposing ~285 tools for the DaVinci Resolve scripting API (v20.3), plus AI bridge tools powered by Google Gemini.
+MCP server exposing ~296 tools for the DaVinci Resolve scripting API (v20.3), plus AI bridge tools powered by Google Gemini.
 
 ## Quick Start
 

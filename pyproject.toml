@@ -1,7 +1,7 @@
 [project]
 name = "resolve-mcp"
 version = "0.1.6"
-description = "MCP server with 285+ tools for DaVinci Resolve scripting API (v20.3)"
+description = "MCP server with 295+ tools for DaVinci Resolve scripting API (v20.3)"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"

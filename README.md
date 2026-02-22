@@ -1,6 +1,6 @@
 # resolve-mcp
 
-**The most comprehensive MCP server for DaVinci Resolve.** 215+ tools covering the complete DaVinci Resolve scripting API (v20.3) — control every aspect of Resolve from Claude, ChatGPT, or any MCP-compatible AI assistant.
+**The most comprehensive MCP server for DaVinci Resolve.** 295+ tools covering the complete DaVinci Resolve scripting API (v20.3) — control every aspect of Resolve from Claude, ChatGPT, or any MCP-compatible AI assistant.
 
 [![PyPI](https://img.shields.io/pypi/v/resolve-mcp)](https://pypi.org/project/resolve-mcp/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
@@ -10,13 +10,13 @@
 
 ## What is resolve-mcp?
 
-`resolve-mcp` is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that exposes **215+ tools** for controlling DaVinci Resolve through AI assistants like Claude, Claude Code, Cursor, Windsurf, ChatGPT, and any other MCP client.
+`resolve-mcp` is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that exposes **295+ tools** for controlling DaVinci Resolve through AI assistants like Claude, Claude Code, Cursor, Windsurf, ChatGPT, and any other MCP client.
 
 It turns natural language into Resolve scripting API calls — letting you manage projects, edit timelines, grade color, render deliverables, manage media pools, control Fusion compositions, and more, all through conversation with an AI.
 
 ### Why resolve-mcp?
 
-- **Complete API coverage** — 215+ tools spanning every Resolve scripting API surface: projects, media pool, timelines, editing, markers, rendering, color grading, Fusion, Fairlight, galleries, node graphs, Dolby Vision, and stereo 3D
+- **Complete API coverage** — 295+ tools spanning every Resolve scripting API surface: projects, media pool, timelines, editing, markers, rendering, color grading, Fusion, Fairlight, galleries, node graphs, Dolby Vision, and stereo 3D
 - **Zero code required** — just talk to your AI assistant: *"Create a new timeline called 'Final Cut' at 24fps"* or *"Add a dissolve transition to every cut point"*
 - **One-line install** — `uvx resolve-mcp` or `pip install resolve-mcp`
 - **Works with any MCP client** — Claude Desktop, Claude Code, Cursor, Windsurf, VS Code + Continue, or your own MCP client
@@ -113,7 +113,7 @@ Get a free Gemini API key at [aistudio.google.com](https://aistudio.google.com/)
 
 ## Using Both Servers Together — resolve-mcp + resolve-assistant
 
-`resolve-mcp` gives you **215+ tools for direct DaVinci Resolve control** — projects, timelines, editing, color grading, rendering, Fusion, Fairlight, and more.
+`resolve-mcp` gives you **295+ tools for direct DaVinci Resolve control** — projects, timelines, editing, color grading, rendering, Fusion, Fairlight, and more.
 
 **[resolve-assistant](https://github.com/jenkinsm13/resolve-assistant)** is a separate MCP server that adds **AI-powered automatic editing** — point it at a folder of footage and give it an editing instruction, and it uses Google Gemini to watch every frame, plan the edit, and build the timeline in Resolve automatically.
 
@@ -427,7 +427,7 @@ This repo is also a **Claude Code plugin** that installs 13 editor-focused skill
 claude plugin add github.com/jenkinsm13/resolve-mcp
 ```
 
-This installs the **MCP server** (215+ tools) AND all skills, agents, and hooks in one step. No separate MCP configuration needed — the plugin bundles it all.
+This installs the **MCP server** (295+ tools) AND all skills, agents, and hooks in one step. No separate MCP configuration needed — the plugin bundles it all.
 
 > **Note:** Set your `GEMINI_API_KEY` in the MCP server config after install if you want the AI bridge tools. The 215+ Resolve tools work without it.
 
@@ -506,7 +506,7 @@ resolve-mcp
 
 ### How It Works
 
-1. **resolve-mcp** starts a FastMCP server that registers 215+ tools
+1. **resolve-mcp** starts a FastMCP server that registers 295+ tools
 2. Your AI client (Claude, Cursor, etc.) connects via the MCP protocol
 3. When you make a request, the AI selects the appropriate tool(s)
 4. Each tool calls the DaVinci Resolve scripting API via the Python SDK

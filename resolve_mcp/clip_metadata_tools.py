@@ -236,6 +236,71 @@ def resolve_clip_clear_flags(clip_name: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Clip color
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool
+@safe_resolve_call
+def resolve_clip_get_color(clip_name: str) -> str:
+    """Get the color tag of a media pool clip.
+
+    Args:
+        clip_name: Clip filename or stem (without extension) in the media pool.
+
+    See also: resolve_set_clip_color, resolve_clip_clear_color
+    """
+    _, _, mp = _boilerplate()
+    c = _clip(mp, clip_name)
+    if not c:
+        return f"Clip '{clip_name}' not found."
+    color = c.GetClipColor()
+    return f"Color: {color}" if color else "No color set."
+
+
+@mcp.tool
+@safe_resolve_call
+def resolve_clip_clear_color(clip_name: str) -> str:
+    """Clear the color tag from a media pool clip.
+
+    Args:
+        clip_name: Clip filename or stem (without extension) in the media pool.
+
+    See also: resolve_set_clip_color, resolve_clip_get_color
+    """
+    _, _, mp = _boilerplate()
+    c = _clip(mp, clip_name)
+    if not c:
+        return f"Clip '{clip_name}' not found."
+    r = c.ClearClipColor()
+    return "Color cleared." if r else "Failed to clear color."
+
+
+# ---------------------------------------------------------------------------
+# Delete markers by custom data
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool
+@safe_resolve_call
+def resolve_clip_delete_marker_by_custom_data(clip_name: str, custom_data: str) -> str:
+    """Delete a marker on a media pool clip identified by its custom data string.
+
+    Args:
+        clip_name: Clip filename or stem (without extension) in the media pool.
+        custom_data: The exact custom data string that identifies the marker.
+
+    See also: resolve_clip_find_marker, resolve_clip_delete_markers
+    """
+    _, _, mp = _boilerplate()
+    c = _clip(mp, clip_name)
+    if not c:
+        return f"Clip '{clip_name}' not found."
+    r = c.DeleteMarkerByCustomData(custom_data)
+    return "Marker deleted." if r else "No marker with that custom data found."
+
+
+# ---------------------------------------------------------------------------
 # Proxy, replace, transcription, IDs
 # ---------------------------------------------------------------------------
 

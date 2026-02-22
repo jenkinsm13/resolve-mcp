@@ -84,6 +84,24 @@ def resolve_get_timeline_info(timeline_name: str = "") -> str:
 
 
 @mcp.tool
+def resolve_rename_timeline(new_name: str, timeline_name: str = "") -> str:
+    """Rename a timeline.
+
+    *new_name*: the new name for the timeline.
+    *timeline_name*: which timeline to rename (default: current active timeline).
+    """
+    _, project, _ = _boilerplate()
+    tl = _get_timeline_by_name(project, timeline_name) if timeline_name else project.GetCurrentTimeline()
+    if not tl:
+        return f"Timeline '{timeline_name}' not found." if timeline_name else "No active timeline."
+    old_name = tl.GetName()
+    result = tl.SetName(new_name)
+    if result:
+        return f"Renamed timeline '{old_name}' → '{new_name}'."
+    return f"Failed to rename timeline. Name '{new_name}' may already exist."
+
+
+@mcp.tool
 def resolve_set_current_timeline(timeline_name: str) -> str:
     """Switch the active timeline by name."""
     _, project, _ = _boilerplate()
