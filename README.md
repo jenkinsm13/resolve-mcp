@@ -49,7 +49,9 @@ pipx install resolve-mcp
 
 ### Configure Claude Desktop
 
-Add to your Claude Desktop MCP config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+Add to your Claude Desktop MCP config:
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
@@ -98,6 +100,8 @@ To use the 3 Gemini-powered AI tools (`resolve_analyze_timeline`, `resolve_add_m
   }
 }
 ```
+
+> **Windows note:** If `uvx` is not on your system PATH, use the full path to `uvx.exe` (e.g., `C:\\Users\\YOU\\.local\\bin\\uvx.exe`) as the `"command"` value.
 
 Get a free Gemini API key at [aistudio.google.com](https://aistudio.google.com/).
 
