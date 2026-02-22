@@ -2,12 +2,12 @@
 
 from .config import mcp
 from .resolve import _boilerplate
-from .color_grade_tools import _current_item
 
 
 @mcp.tool
-def resolve_copy_grade(source_clip_index: int, target_clip_indices: str,
-                       track_type: str = "video", track_index: int = 1) -> str:
+def resolve_copy_grade(
+    source_clip_index: int, target_clip_indices: str, track_type: str = "video", track_index: int = 1
+) -> str:
     """Copy the grade from one clip to others on the timeline.
 
     *source_clip_index*: 1-based index of the source clip on the track.
@@ -70,7 +70,11 @@ def resolve_export_frame(file_path: str) -> str:
     """
     _, project, _ = _boilerplate()
     result = project.ExportCurrentFrameAsStill(file_path)
-    return f"Frame exported to {file_path}" if result else "Frame export failed. Check path and ensure a timeline is active."
+    return (
+        f"Frame exported to {file_path}"
+        if result
+        else "Frame export failed. Check path and ensure a timeline is active."
+    )
 
 
 @mcp.tool

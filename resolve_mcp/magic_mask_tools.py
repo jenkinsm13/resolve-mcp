@@ -10,8 +10,9 @@ from .resolve import _boilerplate
 
 
 @mcp.tool
-def resolve_create_magic_mask(mode: str = "F", track_type: str = "video",
-                               track_index: int = 1, item_index: int = 0) -> str:
+def resolve_create_magic_mask(
+    mode: str = "F", track_type: str = "video", track_index: int = 1, item_index: int = 0
+) -> str:
     """Create a Magic Mask on a timeline clip.
 
     *mode*: 'F' (forward), 'B' (backward), or 'BI' (bidirectional).
@@ -45,13 +46,11 @@ def resolve_create_magic_mask(mode: str = "F", track_type: str = "video",
     name = item.GetName() or f"clip {item_index}"
     if result:
         return f"Magic Mask created on '{name}' ({mode_labels[mode]} tracking)."
-    return f"Failed to create Magic Mask. Requires Resolve Studio."
+    return "Failed to create Magic Mask. Requires Resolve Studio."
 
 
 @mcp.tool
-def resolve_regenerate_magic_mask(track_type: str = "video",
-                                    track_index: int = 1,
-                                    item_index: int = 0) -> str:
+def resolve_regenerate_magic_mask(track_type: str = "video", track_index: int = 1, item_index: int = 0) -> str:
     """Regenerate the Magic Mask on a timeline clip.
 
     *item_index*: 0 = current clip (Color page), or 1-based clip index.
@@ -77,4 +76,4 @@ def resolve_regenerate_magic_mask(track_type: str = "video",
     name = item.GetName() or f"clip {item_index}"
     if result:
         return f"Magic Mask regenerated on '{name}'."
-    return f"Failed to regenerate Magic Mask. Requires Resolve Studio."
+    return "Failed to regenerate Magic Mask. Requires Resolve Studio."

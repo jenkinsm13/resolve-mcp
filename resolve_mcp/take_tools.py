@@ -23,9 +23,9 @@ def _get_item(track_type, track_index, item_index):
 
 
 @mcp.tool
-def resolve_item_add_take(track_type: str, track_index: int,
-                           item_index: int, clip_name: str,
-                           start_frame: int = -1, end_frame: int = -1) -> str:
+def resolve_item_add_take(
+    track_type: str, track_index: int, item_index: int, clip_name: str, start_frame: int = -1, end_frame: int = -1
+) -> str:
     """Add a media pool clip as a new take for a timeline item.
 
     *track_type*: 'video' or 'audio'.
@@ -63,10 +63,10 @@ def resolve_item_add_take(track_type: str, track_index: int,
 
 def _find_clip_recursive(folder, name):
     """Recursively search for a clip by name."""
-    for clip in (folder.GetClipList() or []):
+    for clip in folder.GetClipList() or []:
         if clip.GetName() == name:
             return clip
-    for sub in (folder.GetSubFolderList() or []):
+    for sub in folder.GetSubFolderList() or []:
         found = _find_clip_recursive(sub, name)
         if found:
             return found
@@ -74,8 +74,7 @@ def _find_clip_recursive(folder, name):
 
 
 @mcp.tool
-def resolve_item_get_takes_count(track_type: str, track_index: int,
-                                  item_index: int) -> str:
+def resolve_item_get_takes_count(track_type: str, track_index: int, item_index: int) -> str:
     """Get the number of takes for a timeline item.
 
     Returns 0 if the clip is not a take selector.
@@ -88,8 +87,7 @@ def resolve_item_get_takes_count(track_type: str, track_index: int,
 
 
 @mcp.tool
-def resolve_item_get_selected_take(track_type: str, track_index: int,
-                                    item_index: int) -> str:
+def resolve_item_get_selected_take(track_type: str, track_index: int, item_index: int) -> str:
     """Get the currently selected take index for a timeline item.
 
     Returns 0 if the clip is not a take selector.
@@ -103,8 +101,7 @@ def resolve_item_get_selected_take(track_type: str, track_index: int,
 
 
 @mcp.tool
-def resolve_item_get_take(track_type: str, track_index: int,
-                           item_index: int, take_index: int) -> str:
+def resolve_item_get_take(track_type: str, track_index: int, item_index: int, take_index: int) -> str:
     """Get information about a specific take.
 
     *take_index*: 1-based take number.
@@ -123,8 +120,7 @@ def resolve_item_get_take(track_type: str, track_index: int,
 
 
 @mcp.tool
-def resolve_item_select_take(track_type: str, track_index: int,
-                              item_index: int, take_index: int) -> str:
+def resolve_item_select_take(track_type: str, track_index: int, item_index: int, take_index: int) -> str:
     """Select a specific take for a timeline item.
 
     *take_index*: 1-based take number.
@@ -137,8 +133,7 @@ def resolve_item_select_take(track_type: str, track_index: int,
 
 
 @mcp.tool
-def resolve_item_delete_take(track_type: str, track_index: int,
-                              item_index: int, take_index: int) -> str:
+def resolve_item_delete_take(track_type: str, track_index: int, item_index: int, take_index: int) -> str:
     """Delete a take from a timeline item's take selector.
 
     *take_index*: 1-based take number.
@@ -151,8 +146,7 @@ def resolve_item_delete_take(track_type: str, track_index: int,
 
 
 @mcp.tool
-def resolve_item_finalize_take(track_type: str, track_index: int,
-                                item_index: int) -> str:
+def resolve_item_finalize_take(track_type: str, track_index: int, item_index: int) -> str:
     """Finalize the take selection, removing the take selector.
 
     After finalization, the currently selected take becomes the clip

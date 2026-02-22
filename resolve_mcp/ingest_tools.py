@@ -5,16 +5,15 @@ Ingest MCP tools: ingest_footage and ingest_status.
 import shutil
 import threading
 from pathlib import Path
-from typing import Optional
 
 from .config import mcp
+from .ingest_worker import _active_workers, _ingest_worker, _read_progress, _write_progress
+from .media import list_all_audio, list_all_videos, list_pending_audio, list_pending_videos
 from .transcode import get_hw_encoder
-from .media import list_all_videos, list_all_audio, list_pending_videos, list_pending_audio
-from .ingest_worker import _ingest_worker, _active_workers, _write_progress, _read_progress
 
 
 @mcp.tool
-def ingest_footage(folder_path: str, instruction: Optional[str] = None) -> str:
+def ingest_footage(folder_path: str, instruction: str | None = None) -> str:
     """
     Scan a folder for video and audio files and analyze them with Gemini.
     Launches a background worker that processes ALL pending files
@@ -62,11 +61,17 @@ def ingest_footage(folder_path: str, instruction: Optional[str] = None) -> str:
         )
 
     already_done = total - len(pending)
-    _write_progress(root, {
-        "status": "starting", "current_file": pending[0].name,
-        "current_step": "queued", "completed": already_done,
-        "total": total, "errors": [],
-    })
+    _write_progress(
+        root,
+        {
+            "status": "starting",
+            "current_file": pending[0].name,
+            "current_step": "queued",
+            "completed": already_done,
+            "total": total,
+            "errors": [],
+        },
+    )
 
     thread = threading.Thread(target=_ingest_worker, args=(root, instruction), daemon=True)
     thread.start()

@@ -2,11 +2,14 @@
 Timeline building: AppendToTimeline pipeline, marker utilities, XML import fallback.
 """
 
-import time
+import contextlib
 from pathlib import Path
 
 from .resolve import (
-    get_resolve, _collect_clips_recursive, _unique_timeline_name, _FPS_MAP,
+    _FPS_MAP,
+    _collect_clips_recursive,
+    _unique_timeline_name,
+    get_resolve,
 )
 from .resolve_transforms import _apply_clip_transform, _apply_speed_ramp
 
@@ -44,13 +47,11 @@ def build_timeline_direct(edit_plan: dict, resolve_obj) -> tuple:
 
     project.SetCurrentTimeline(timeline)
     fps_label = _FPS_MAP.get(round(timeline_fps, 3), str(timeline_fps))
-    try:
+    with contextlib.suppress(Exception):
         timeline.SetSetting("timelineFrameRate", fps_label)
-    except Exception:
-        pass
 
     clip_items: list[dict] = []
-    clip_cuts:  list[dict] = []
+    clip_cuts: list[dict] = []
     missing: list[str] = []
 
     for cut in cuts:
@@ -66,10 +67,8 @@ def build_timeline_direct(edit_plan: dict, resolve_obj) -> tuple:
 
         if clip:
             clip_fps = timeline_fps
-            try:
+            with contextlib.suppress(Exception):
                 clip_fps = float(clip.GetClipProperty("FPS"))
-            except Exception:
-                pass
 
             clip_dict: dict = {
                 "mediaPoolItem": clip,
@@ -87,7 +86,7 @@ def build_timeline_direct(edit_plan: dict, resolve_obj) -> tuple:
 
     if clip_items and "recordFrame" in clip_items[0]:
         paired = sorted(
-            zip(clip_items, clip_cuts),
+            zip(clip_items, clip_cuts, strict=False),
             key=lambda c: (c[0].get("trackIndex", 1), c[0]["recordFrame"]),
         )
         clip_items, clip_cuts = [p[0] for p in paired], [p[1] for p in paired]
@@ -116,12 +115,16 @@ def build_timeline_direct(edit_plan: dict, resolve_obj) -> tuple:
             a_start = float(audio_info.get("start_sec", 0))
             a_end = float(audio_info.get("end_sec", 0))
             if a_end > a_start:
-                media_pool.AppendToTimeline([{
-                    "mediaPoolItem": a_clip,
-                    "startFrame": round(a_start * timeline_fps),
-                    "endFrame": round(a_end * timeline_fps),
-                    "mediaType": 2,
-                }])
+                media_pool.AppendToTimeline(
+                    [
+                        {
+                            "mediaPoolItem": a_clip,
+                            "startFrame": round(a_start * timeline_fps),
+                            "endFrame": round(a_end * timeline_fps),
+                            "mediaType": 2,
+                        }
+                    ]
+                )
 
     n_appended = len(appended) if appended else 0
     msg = f"Timeline '{name}' created with {n_appended}/{len(clip_items)} video clips."
@@ -143,13 +146,15 @@ def read_timeline_markers(timeline) -> list:
     raw = timeline.GetMarkers() or {}
     markers = []
     for frame_id, info in sorted(raw.items(), key=lambda x: int(x[0])):
-        markers.append({
-            "frame": int(frame_id),
-            "sec": int(frame_id) / fps,
-            "color": info.get("color", "Blue"),
-            "name": info.get("name", ""),
-            "note": info.get("note", ""),
-        })
+        markers.append(
+            {
+                "frame": int(frame_id),
+                "sec": int(frame_id) / fps,
+                "color": info.get("color", "Blue"),
+                "name": info.get("name", ""),
+                "note": info.get("note", ""),
+            }
+        )
     return markers
 
 
@@ -185,14 +190,16 @@ def markers_to_slots(markers: list) -> list:
         for i in range(0, len(color_markers) - 1, 2):
             m_in, m_out = color_markers[i], color_markers[i + 1]
             note = m_in.get("note") or m_out.get("note") or ""
-            slots.append({
-                "slot": slot_idx,
-                "track": track,
-                "timeline_in": m_in["sec"],
-                "timeline_out": m_out["sec"],
-                "color": color,
-                "note": note,
-            })
+            slots.append(
+                {
+                    "slot": slot_idx,
+                    "track": track,
+                    "timeline_in": m_in["sec"],
+                    "timeline_out": m_out["sec"],
+                    "color": color,
+                    "note": note,
+                }
+            )
             slot_idx += 1
 
     slots.sort(key=lambda s: s["timeline_in"])
@@ -227,4 +234,8 @@ def try_resolve_import(xml_path: Path, edit_plan: dict) -> str:
 
     result = media_pool.ImportTimelineFromFile(str(xml_path))
     status = "Imported" if result else "Timeline import falsy"
-    return f"{status} ({', '.join(media_msgs)}) — import XML manually." if not result else f"{status} ({', '.join(media_msgs)})."
+    return (
+        f"{status} ({', '.join(media_msgs)}) — import XML manually."
+        if not result
+        else f"{status} ({', '.join(media_msgs)})."
+    )

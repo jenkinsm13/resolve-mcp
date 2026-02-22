@@ -19,6 +19,7 @@ def _gallery(project):
 
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
 def resolve_list_still_albums() -> str:
@@ -115,8 +116,7 @@ def resolve_list_stills(album_name: str = "") -> str:
 
 @mcp.tool
 @safe_resolve_call
-def resolve_export_stills(file_path: str, album_name: str = "",
-                           format: str = "dpx") -> str:
+def resolve_export_stills(file_path: str, album_name: str = "", format: str = "dpx") -> str:
     """Export all stills from an album to a folder.
 
     *file_path*: directory to export into.
@@ -191,6 +191,7 @@ def resolve_delete_stills(album_name: str = "") -> str:
 # ---------------------------------------------------------------------------
 # Album creation
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 @safe_resolve_call
@@ -283,8 +284,7 @@ def resolve_import_stills(file_paths: str, album_name: str = "") -> str:
 
 @mcp.tool
 @safe_resolve_call
-def resolve_set_still_label(label: str, still_index: int = 1,
-                              album_name: str = "") -> str:
+def resolve_set_still_label(label: str, still_index: int = 1, album_name: str = "") -> str:
     """Set a label on a gallery still.
 
     *label*: the label text.

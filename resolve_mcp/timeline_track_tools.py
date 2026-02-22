@@ -20,7 +20,11 @@ def resolve_add_track(track_type: str, sub_type: str = "") -> str:
     if track_type not in {"video", "audio", "subtitle"}:
         return "track_type must be 'video', 'audio', or 'subtitle'."
     result = tl.AddTrack(track_type, sub_type if sub_type else "")
-    return f"Added {track_type} track (now {tl.GetTrackCount(track_type)} total)." if result else f"Failed to add {track_type} track."
+    return (
+        f"Added {track_type} track (now {tl.GetTrackCount(track_type)} total)."
+        if result
+        else f"Failed to add {track_type} track."
+    )
 
 
 @mcp.tool
@@ -34,7 +38,11 @@ def resolve_delete_track(track_type: str, track_index: int) -> str:
     if not tl:
         return "No active timeline."
     result = tl.DeleteTrack(track_type.lower(), int(track_index))
-    return f"Deleted {track_type} track {track_index}." if result else f"Failed to delete {track_type} track {track_index}."
+    return (
+        f"Deleted {track_type} track {track_index}."
+        if result
+        else f"Failed to delete {track_type} track {track_index}."
+    )
 
 
 @mcp.tool
@@ -57,7 +65,11 @@ def resolve_set_track_enabled(track_type: str, track_index: int, enabled: bool =
         return "No active timeline."
     result = tl.SetTrackEnable(track_type.lower(), int(track_index), enabled)
     state = "enabled" if enabled else "disabled"
-    return f"{track_type.capitalize()} track {track_index} {state}." if result else f"Failed to set {track_type} track {track_index} to {state}."
+    return (
+        f"{track_type.capitalize()} track {track_index} {state}."
+        if result
+        else f"Failed to set {track_type} track {track_index} to {state}."
+    )
 
 
 @mcp.tool
@@ -90,12 +102,28 @@ def resolve_export_timeline(format: str, file_path: str, timeline_name: str = ""
         if not tl:
             return "No active timeline."
 
-    valid_formats = {"AAF", "DRT", "EDL", "FCP_7_XML", "FCPXML_1_8", "FCPXML_1_9", "FCPXML_1_10", "HDL", "CSV", "MIDI", "OTIO"}
+    valid_formats = {
+        "AAF",
+        "DRT",
+        "EDL",
+        "FCP_7_XML",
+        "FCPXML_1_8",
+        "FCPXML_1_9",
+        "FCPXML_1_10",
+        "HDL",
+        "CSV",
+        "MIDI",
+        "OTIO",
+    }
     fmt_upper = format.upper().replace(" ", "_")
     if fmt_upper not in valid_formats:
         return f"Invalid format '{format}'. Valid: {', '.join(sorted(valid_formats))}"
     result = tl.Export(file_path, fmt_upper)
-    return f"Exported timeline '{tl.GetName()}' as {fmt_upper} → {file_path}" if result else "Export failed. Check file path and permissions."
+    return (
+        f"Exported timeline '{tl.GetName()}' as {fmt_upper} → {file_path}"
+        if result
+        else "Export failed. Check file path and permissions."
+    )
 
 
 @mcp.tool
@@ -115,4 +143,8 @@ def resolve_create_subtitles(track_index: int = 0, language: str = "auto") -> st
     if track_index > 0:
         settings["trackIndex"] = track_index
     result = tl.CreateSubtitlesFromAudio(settings) if settings else tl.CreateSubtitlesFromAudio()
-    return "Auto-caption generation started." if result else "Auto-caption failed. Requires Resolve Studio and language packs."
+    return (
+        "Auto-caption generation started."
+        if result
+        else "Auto-caption failed. Requires Resolve Studio and language packs."
+    )

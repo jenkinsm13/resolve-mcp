@@ -8,7 +8,6 @@ This affects which parameters are keyframed when making adjustments.
 from .config import mcp
 from .resolve import get_resolve
 
-
 _MODE_NAMES = {0: "All", 1: "Color", 2: "Sizing"}
 _MODE_VALUES = {"all": 0, "color": 1, "sizing": 2}
 

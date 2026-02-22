@@ -27,13 +27,20 @@ def _item(project, track_type, track_index, item_index):
 # Markers
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_item_add_marker(track_type: str, track_index: int,
-                             item_index: int, frame: int,
-                             color: str = "Blue", name: str = "",
-                             note: str = "", duration: int = 1,
-                             custom_data: str = "") -> str:
+def resolve_item_add_marker(
+    track_type: str,
+    track_index: int,
+    item_index: int,
+    frame: int,
+    color: str = "Blue",
+    name: str = "",
+    note: str = "",
+    duration: int = 1,
+    custom_data: str = "",
+) -> str:
     """Add a marker to a timeline item at a frame offset within the clip.
 
     Args:
@@ -58,8 +65,7 @@ def resolve_item_add_marker(track_type: str, track_index: int,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_get_markers(track_type: str, track_index: int,
-                              item_index: int) -> str:
+def resolve_item_get_markers(track_type: str, track_index: int, item_index: int) -> str:
     """List all markers on a timeline item.
 
     Args:
@@ -77,14 +83,13 @@ def resolve_item_get_markers(track_type: str, track_index: int,
     lines = [f"{len(markers)} marker(s):"]
     for fid in sorted(markers.keys(), key=int):
         info = markers[fid]
-        lines.append(f"  frame {fid} [{info.get('color','')}] {info.get('name','')}")
+        lines.append(f"  frame {fid} [{info.get('color', '')}] {info.get('name', '')}")
     return "\n".join(lines)
 
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_delete_markers(track_type: str, track_index: int,
-                                 item_index: int, color: str = "All") -> str:
+def resolve_item_delete_markers(track_type: str, track_index: int, item_index: int, color: str = "All") -> str:
     """Delete markers on a timeline item by color.
 
     Args:
@@ -103,8 +108,7 @@ def resolve_item_delete_markers(track_type: str, track_index: int,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_delete_marker_at(track_type: str, track_index: int,
-                                   item_index: int, frame: int) -> str:
+def resolve_item_delete_marker_at(track_type: str, track_index: int, item_index: int, frame: int) -> str:
     """Delete a specific marker on a timeline item.
 
     Args:
@@ -123,8 +127,7 @@ def resolve_item_delete_marker_at(track_type: str, track_index: int,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_find_marker(track_type: str, track_index: int,
-                              item_index: int, custom_data: str) -> str:
+def resolve_item_find_marker(track_type: str, track_index: int, item_index: int, custom_data: str) -> str:
     """Find a marker on a timeline item by custom data.
 
     Args:
@@ -145,10 +148,10 @@ def resolve_item_find_marker(track_type: str, track_index: int,
 # Flags
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_item_add_flag(track_type: str, track_index: int,
-                           item_index: int, color: str) -> str:
+def resolve_item_add_flag(track_type: str, track_index: int, item_index: int, color: str) -> str:
     """Add a flag to a timeline item.
 
     Args:
@@ -168,8 +171,7 @@ def resolve_item_add_flag(track_type: str, track_index: int,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_get_flags(track_type: str, track_index: int,
-                            item_index: int) -> str:
+def resolve_item_get_flags(track_type: str, track_index: int, item_index: int) -> str:
     """List all flags on a timeline item.
 
     Args:
@@ -187,8 +189,7 @@ def resolve_item_get_flags(track_type: str, track_index: int,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_clear_flags(track_type: str, track_index: int,
-                              item_index: int) -> str:
+def resolve_item_clear_flags(track_type: str, track_index: int, item_index: int) -> str:
     """Clear all flags from a timeline item.
 
     Args:
@@ -208,10 +209,10 @@ def resolve_item_clear_flags(track_type: str, track_index: int,
 # Source info & IDs
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_item_get_source_timecodes(track_type: str, track_index: int,
-                                       item_index: int) -> str:
+def resolve_item_get_source_timecodes(track_type: str, track_index: int, item_index: int) -> str:
     """Get source start/end timecodes and frames for a timeline item.
 
     Args:
@@ -223,14 +224,15 @@ def resolve_item_get_source_timecodes(track_type: str, track_index: int,
     """
     _, project, _ = _boilerplate()
     it = _item(project, track_type, track_index, item_index)
-    return (f"Source start: {it.GetSourceStartTimecode()} (frame {it.GetSourceStartFrame()})\n"
-            f"Source end:   {it.GetSourceEndTimecode()} (frame {it.GetSourceEndFrame()})")
+    return (
+        f"Source start: {it.GetSourceStartTimecode()} (frame {it.GetSourceStartFrame()})\n"
+        f"Source end:   {it.GetSourceEndTimecode()} (frame {it.GetSourceEndFrame()})"
+    )
 
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_get_id(track_type: str, track_index: int,
-                         item_index: int) -> str:
+def resolve_item_get_id(track_type: str, track_index: int, item_index: int) -> str:
     """Get the unique ID of a timeline item.
 
     Args:

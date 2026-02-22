@@ -61,10 +61,19 @@ def resolve_get_lut(node_index: int = 1) -> str:
 
 
 @mcp.tool
-def resolve_set_cdl(node_index: int, slope_r: float, slope_g: float,
-                    slope_b: float, offset_r: float, offset_g: float,
-                    offset_b: float, power_r: float, power_g: float,
-                    power_b: float, saturation: float) -> str:
+def resolve_set_cdl(
+    node_index: int,
+    slope_r: float,
+    slope_g: float,
+    slope_b: float,
+    offset_r: float,
+    offset_g: float,
+    offset_b: float,
+    power_r: float,
+    power_g: float,
+    power_b: float,
+    saturation: float,
+) -> str:
     """Set CDL (Color Decision List) values on the current clip.
 
     Standard neutral values: slope=1.0, offset=0.0, power=1.0, saturation=1.0

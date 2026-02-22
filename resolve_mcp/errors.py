@@ -50,6 +50,7 @@ def safe_resolve_call(func):
     LLM gets actionable feedback instead of a traceback.  ValueError
     from _boilerplate() is passed through as-is (already formatted).
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -69,4 +70,5 @@ def safe_resolve_call(func):
         except Exception as exc:
             log.exception("Unexpected error in %s", func.__name__)
             return f"Error: Unexpected failure in {func.__name__}: {exc}"
+
     return wrapper

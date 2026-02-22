@@ -58,6 +58,10 @@ ignore = [
     "SIM108", # ternary — readability matters more
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"resolve_mcp/__init__.py" = ["E402", "I001"]  # imports after main() — intentional cascading registration
+"resolve_mcp/resolve.py" = ["E402"]           # re-exports at bottom — intentional backward-compat shim
+
 [tool.ruff.format]
 quote-style = "double"
 

@@ -134,7 +134,8 @@ class TestModuleImports:
             module_name = tool_file.stem
             if module_name in INDIRECT_IMPORT_MODULES:
                 continue  # known to be imported by other modules
-            if f"import {module_name}" not in init_source:
+            # Match both `from . import X` and grouped `from . import (\n    X,`
+            if f"import {module_name}" not in init_source and f"    {module_name}," not in init_source:
                 unimported.append(module_name)
 
         assert not unimported, f"Tool modules not imported in __init__.py: {unimported}"

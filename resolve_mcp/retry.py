@@ -28,10 +28,13 @@ def retry_gemini(fn, *args, max_retries: int = 5, base_delay: float = 5.0, **kwa
         except Exception as exc:
             last_exc = exc
             if attempt < max_retries and _is_retriable(exc):
-                delay = base_delay * (2 ** attempt)
+                delay = base_delay * (2**attempt)
                 log.warning(
                     "Gemini error (attempt %d/%d), retrying in %.0fs: %s",
-                    attempt + 1, max_retries + 1, delay, exc,
+                    attempt + 1,
+                    max_retries + 1,
+                    delay,
+                    exc,
                 )
                 time.sleep(delay)
             else:

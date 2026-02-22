@@ -20,11 +20,18 @@ def _clip(media_pool, name: str):
 # Markers on MediaPoolItem
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_clip_add_marker(clip_name: str, frame: int, color: str = "Blue",
-                             name: str = "", note: str = "",
-                             duration: int = 1, custom_data: str = "") -> str:
+def resolve_clip_add_marker(
+    clip_name: str,
+    frame: int,
+    color: str = "Blue",
+    name: str = "",
+    note: str = "",
+    duration: int = 1,
+    custom_data: str = "",
+) -> str:
     """Add a marker to a media pool clip at the given frame offset.
 
     Args:
@@ -67,7 +74,7 @@ def resolve_clip_get_markers(clip_name: str) -> str:
     lines = [f"{len(markers)} marker(s):"]
     for frame_id in sorted(markers.keys(), key=int):
         info = markers[frame_id]
-        lines.append(f"  frame {frame_id} [{info.get('color','')}] {info.get('name','')}")
+        lines.append(f"  frame {frame_id} [{info.get('color', '')}] {info.get('name', '')}")
     return "\n".join(lines)
 
 
@@ -111,8 +118,7 @@ def resolve_clip_delete_marker_at(clip_name: str, frame: int) -> str:
 
 @mcp.tool
 @safe_resolve_call
-def resolve_clip_update_marker_data(clip_name: str, frame: int,
-                                     custom_data: str) -> str:
+def resolve_clip_update_marker_data(clip_name: str, frame: int, custom_data: str) -> str:
     """Update custom data on a clip marker.
 
     Args:
@@ -171,6 +177,7 @@ def resolve_clip_find_marker(clip_name: str, custom_data: str) -> str:
 # ---------------------------------------------------------------------------
 # Flags
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 @safe_resolve_call
@@ -231,6 +238,7 @@ def resolve_clip_clear_flags(clip_name: str) -> str:
 # ---------------------------------------------------------------------------
 # Proxy, replace, transcription, IDs
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 @safe_resolve_call

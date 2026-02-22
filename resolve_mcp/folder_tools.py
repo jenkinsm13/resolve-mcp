@@ -10,8 +10,8 @@ from .config import mcp
 from .errors import safe_resolve_call
 from .resolve import _boilerplate, _find_bin
 
-
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 @safe_resolve_call
@@ -32,8 +32,7 @@ def resolve_folder_transcribe(bin_name: str) -> str:
     if not folder:
         return f"Bin '{bin_name}' not found."
     r = folder.TranscribeAudio()
-    return f"Transcription started for bin '{bin_name}'." if r \
-        else "Failed — requires Resolve Studio."
+    return f"Transcription started for bin '{bin_name}'." if r else "Failed — requires Resolve Studio."
 
 
 @mcp.tool

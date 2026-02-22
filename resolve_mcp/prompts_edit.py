@@ -2,7 +2,6 @@
 
 from .prompts_music import MUSIC_BRIEF_ADDENDUM  # noqa: F401 — re-exported for convenience
 
-
 EDIT_PROMPT_TEMPLATE = """\
 You are a Professional Film Editor.  You have been given the actual video and audio
 files to watch/listen to, plus pre-analyzed metadata (JSON sidecars) for reference.

@@ -5,16 +5,13 @@ Covers: Voice isolation, audio insertion at playhead, and audio track
 inspection for the Fairlight page.
 """
 
-import json
-from typing import Optional
-
 from .config import mcp
 from .resolve import _boilerplate
-
 
 # ---------------------------------------------------------------------------
 # MCP Tools
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 def resolve_get_voice_isolation(track_index: int) -> str:
@@ -40,8 +37,7 @@ def resolve_get_voice_isolation(track_index: int) -> str:
 
 
 @mcp.tool
-def resolve_set_voice_isolation(track_index: int, enabled: bool = True,
-                                 amount: int = 50) -> str:
+def resolve_set_voice_isolation(track_index: int, enabled: bool = True, amount: int = 50) -> str:
     """Set voice isolation on an audio track.
 
     *track_index*: 1-based audio track number.
@@ -60,12 +56,11 @@ def resolve_set_voice_isolation(track_index: int, enabled: bool = True,
     action = "enabled" if enabled else "disabled"
     if result:
         return f"Voice isolation {action} on audio track {track_index} (amount={amount})."
-    return f"Failed to set voice isolation. Requires Resolve Studio."
+    return "Failed to set voice isolation. Requires Resolve Studio."
 
 
 @mcp.tool
-def resolve_insert_audio_at_playhead(media_path: str, offset: float = 0,
-                                      duration: float = 0) -> str:
+def resolve_insert_audio_at_playhead(media_path: str, offset: float = 0, duration: float = 0) -> str:
     """Insert an audio file at the current playhead position.
 
     *media_path*: absolute path to the audio file.
@@ -82,9 +77,7 @@ def resolve_insert_audio_at_playhead(media_path: str, offset: float = 0,
     if duration > 0:
         args["Duration"] = int(duration * 1000)
 
-    result = project.InsertAudioToCurrentTrackAtPlayhead(
-        media_path, int(offset), int(duration)
-    )
+    result = project.InsertAudioToCurrentTrackAtPlayhead(media_path, int(offset), int(duration))
     if result:
         return f"Audio inserted at playhead from '{media_path}'."
     return "Failed to insert audio. Check file path and ensure Fairlight page is active."

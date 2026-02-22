@@ -15,7 +15,9 @@ def resolve_add_render_job() -> str:
     """
     _, project, _ = _boilerplate()
     job_id = project.AddRenderJob()
-    return f"Render job added (ID: {job_id})." if job_id else "Failed to add render job. Check render settings are valid."
+    return (
+        f"Render job added (ID: {job_id})." if job_id else "Failed to add render job. Check render settings are valid."
+    )
 
 
 @mcp.tool

@@ -5,7 +5,7 @@ Media file discovery and sidecar loading.
 import json
 from pathlib import Path
 
-from .config import VIDEO_EXTS, AUDIO_EXTS, log
+from .config import AUDIO_EXTS, VIDEO_EXTS
 
 
 def is_junk(p: Path) -> bool:
@@ -16,38 +16,25 @@ def is_junk(p: Path) -> bool:
 def list_all_videos(root: Path) -> list[Path]:
     """Return all source video files in *root* (excludes .gemini.mp4 caches)."""
     return sorted(
-        p for p in root.iterdir()
-        if p.suffix.lower() in VIDEO_EXTS
-        and p.is_file()
-        and ".gemini" not in p.stem
-        and not is_junk(p)
+        p
+        for p in root.iterdir()
+        if p.suffix.lower() in VIDEO_EXTS and p.is_file() and ".gemini" not in p.stem and not is_junk(p)
     )
 
 
 def list_all_audio(root: Path) -> list[Path]:
     """Return all audio files in *root*."""
-    return sorted(
-        p for p in root.iterdir()
-        if p.suffix.lower() in AUDIO_EXTS
-        and p.is_file()
-        and not is_junk(p)
-    )
+    return sorted(p for p in root.iterdir() if p.suffix.lower() in AUDIO_EXTS and p.is_file() and not is_junk(p))
 
 
 def list_pending_videos(root: Path) -> list[Path]:
     """Return video files in *root* that lack a sidecar JSON."""
-    return [
-        p for p in list_all_videos(root)
-        if not p.with_suffix(p.suffix + ".json").exists()
-    ]
+    return [p for p in list_all_videos(root) if not p.with_suffix(p.suffix + ".json").exists()]
 
 
 def list_pending_audio(root: Path) -> list[Path]:
     """Return audio files in *root* that lack a sidecar JSON."""
-    return [
-        p for p in list_all_audio(root)
-        if not p.with_suffix(p.suffix + ".json").exists()
-    ]
+    return [p for p in list_all_audio(root) if not p.with_suffix(p.suffix + ".json").exists()]
 
 
 def find_proxy(media_path: Path) -> Path:
@@ -67,8 +54,7 @@ def load_sidecars(folder: Path) -> list[dict]:
     sidecars = []
     all_media_exts = VIDEO_EXTS | AUDIO_EXTS
     media_files = sorted(
-        f for f in folder.iterdir()
-        if f.suffix.lower() in all_media_exts and not f.name.startswith(".")
+        f for f in folder.iterdir() if f.suffix.lower() in all_media_exts and not f.name.startswith(".")
     )
     for mf in media_files:
         sidecar_path = mf.with_name(mf.name + ".json")

@@ -8,15 +8,14 @@ These are critical for playback performance and render optimization.
 from .config import mcp
 from .resolve import _boilerplate
 
-
 # ---------------------------------------------------------------------------
 # Cache value mappings
 # ---------------------------------------------------------------------------
 
 _CACHE_VALUES = {
-    "auto": -1,   # CACHE_AUTO_ENABLED  (Fusion only)
-    "off": 0,     # CACHE_DISABLED
-    "on": 1,      # CACHE_ENABLED
+    "auto": -1,  # CACHE_AUTO_ENABLED  (Fusion only)
+    "off": 0,  # CACHE_DISABLED
+    "on": 1,  # CACHE_ENABLED
 }
 
 _CACHE_LABELS = {-1: "Auto", 0: "Off", 1: "On"}
@@ -38,9 +37,9 @@ def _get_current_item():
 # Timeline Item cache tools
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
-def resolve_get_color_cache(track_type: str = "video", track_index: int = 1,
-                             item_index: int = 0) -> str:
+def resolve_get_color_cache(track_type: str = "video", track_index: int = 1, item_index: int = 0) -> str:
     """Check if Color Output Cache is enabled for a timeline clip.
 
     *item_index*: 0 = current clip (Color page), or 1-based clip index on track.
@@ -68,8 +67,7 @@ def resolve_get_color_cache(track_type: str = "video", track_index: int = 1,
 
 
 @mcp.tool
-def resolve_set_color_cache(enabled: bool, track_type: str = "video",
-                             track_index: int = 1, item_index: int = 0) -> str:
+def resolve_set_color_cache(enabled: bool, track_type: str = "video", track_index: int = 1, item_index: int = 0) -> str:
     """Enable or disable Color Output Cache for a timeline clip.
 
     *enabled*: True to enable, False to disable.
@@ -101,8 +99,7 @@ def resolve_set_color_cache(enabled: bool, track_type: str = "video",
 
 
 @mcp.tool
-def resolve_get_fusion_cache(track_type: str = "video", track_index: int = 1,
-                              item_index: int = 0) -> str:
+def resolve_get_fusion_cache(track_type: str = "video", track_index: int = 1, item_index: int = 0) -> str:
     """Check the Fusion Output Cache state for a timeline clip.
 
     *item_index*: 0 = current clip, or 1-based clip index.
@@ -130,8 +127,9 @@ def resolve_get_fusion_cache(track_type: str = "video", track_index: int = 1,
 
 
 @mcp.tool
-def resolve_set_fusion_cache(mode: str = "auto", track_type: str = "video",
-                              track_index: int = 1, item_index: int = 0) -> str:
+def resolve_set_fusion_cache(
+    mode: str = "auto", track_type: str = "video", track_index: int = 1, item_index: int = 0
+) -> str:
     """Set the Fusion Output Cache mode for a timeline clip.
 
     *mode*: 'auto', 'on', or 'off'.
@@ -167,6 +165,7 @@ def resolve_set_fusion_cache(mode: str = "auto", track_type: str = "video",
 # ---------------------------------------------------------------------------
 # Node-level cache tools (via Graph object)
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 def resolve_node_get_cache(node_index: int) -> str:

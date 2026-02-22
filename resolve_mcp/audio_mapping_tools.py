@@ -38,8 +38,7 @@ def resolve_get_audio_mapping(clip_name: str) -> str:
 
 
 @mcp.tool
-def resolve_get_source_audio_mapping(track_type: str, track_index: int,
-                                       item_index: int) -> str:
+def resolve_get_source_audio_mapping(track_type: str, track_index: int, item_index: int) -> str:
     """Get the source audio channel mapping for a timeline item.
 
     *track_type*: 'video' or 'audio'.
@@ -102,10 +101,10 @@ def _format_mapping(clip_name, mapping):
 
 def _find_clip(folder, name):
     """Recursively search for a clip by name."""
-    for clip in (folder.GetClipList() or []):
+    for clip in folder.GetClipList() or []:
         if clip.GetName() == name:
             return clip
-    for sub in (folder.GetSubFolderList() or []):
+    for sub in folder.GetSubFolderList() or []:
         found = _find_clip(sub, name)
         if found:
             return found

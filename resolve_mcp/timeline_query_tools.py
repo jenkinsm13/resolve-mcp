@@ -58,24 +58,29 @@ def resolve_get_timeline_info(timeline_name: str = "") -> str:
     for track_type, count in [("video", v_tracks), ("audio", a_tracks), ("subtitle", s_tracks)]:
         for idx in range(1, count + 1):
             items = tl.GetItemListInTrack(track_type, idx) or []
-            track_details.append({
-                "type": track_type,
-                "index": idx,
-                "name": tl.GetTrackName(track_type, idx) or "",
-                "clip_count": len(items),
-                "enabled": bool(tl.GetIsTrackEnabled(track_type, idx)),
-                "locked": bool(tl.GetIsTrackLocked(track_type, idx)),
-            })
+            track_details.append(
+                {
+                    "type": track_type,
+                    "index": idx,
+                    "name": tl.GetTrackName(track_type, idx) or "",
+                    "clip_count": len(items),
+                    "enabled": bool(tl.GetIsTrackEnabled(track_type, idx)),
+                    "locked": bool(tl.GetIsTrackLocked(track_type, idx)),
+                }
+            )
 
-    return json.dumps({
-        "name": tl.GetName(),
-        "start_timecode": tl.GetStartTimecode(),
-        "frame_rate": tl.GetSetting("timelineFrameRate"),
-        "video_tracks": v_tracks,
-        "audio_tracks": a_tracks,
-        "subtitle_tracks": s_tracks,
-        "tracks": track_details,
-    }, indent=2)
+    return json.dumps(
+        {
+            "name": tl.GetName(),
+            "start_timecode": tl.GetStartTimecode(),
+            "frame_rate": tl.GetSetting("timelineFrameRate"),
+            "video_tracks": v_tracks,
+            "audio_tracks": a_tracks,
+            "subtitle_tracks": s_tracks,
+            "tracks": track_details,
+        },
+        indent=2,
+    )
 
 
 @mcp.tool
@@ -85,7 +90,11 @@ def resolve_set_current_timeline(timeline_name: str) -> str:
     tl = _get_timeline_by_name(project, timeline_name)
     if not tl:
         return f"Timeline '{timeline_name}' not found."
-    return f"Switched to timeline '{timeline_name}'." if project.SetCurrentTimeline(tl) else f"Failed to switch to '{timeline_name}'."
+    return (
+        f"Switched to timeline '{timeline_name}'."
+        if project.SetCurrentTimeline(tl)
+        else f"Failed to switch to '{timeline_name}'."
+    )
 
 
 @mcp.tool
@@ -144,7 +153,11 @@ def resolve_set_timeline_setting(setting_name: str, value: str) -> str:
     tl = project.GetCurrentTimeline()
     if not tl:
         return "No active timeline."
-    return f"Timeline setting {setting_name} = {value}" if tl.SetSetting(setting_name, value) else f"Failed to set timeline setting '{setting_name}'."
+    return (
+        f"Timeline setting {setting_name} = {value}"
+        if tl.SetSetting(setting_name, value)
+        else f"Failed to set timeline setting '{setting_name}'."
+    )
 
 
 @mcp.tool
@@ -154,4 +167,8 @@ def resolve_set_timeline_start_timecode(timecode: str) -> str:
     tl = project.GetCurrentTimeline()
     if not tl:
         return "No active timeline."
-    return f"Timeline start TC set to {timecode}." if tl.SetStartTimecode(timecode) else f"Failed to set start TC to '{timecode}'."
+    return (
+        f"Timeline start TC set to {timecode}."
+        if tl.SetStartTimecode(timecode)
+        else f"Failed to set start TC to '{timecode}'."
+    )

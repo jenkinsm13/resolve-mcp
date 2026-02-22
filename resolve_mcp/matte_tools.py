@@ -33,8 +33,7 @@ def resolve_get_clip_mattes(clip_name: str) -> str:
 
 
 @mcp.tool
-def resolve_add_clip_mattes(clip_name: str, matte_paths: str,
-                             stereo_eye: str = "") -> str:
+def resolve_add_clip_mattes(clip_name: str, matte_paths: str, stereo_eye: str = "") -> str:
     """Add matte files to a media pool clip.
 
     *clip_name*: name of the media pool clip.
@@ -125,10 +124,10 @@ def resolve_get_timeline_mattes(bin_name: str = "") -> str:
 
 def _find_clip(folder, name):
     """Recursively search for a clip by name."""
-    for clip in (folder.GetClipList() or []):
+    for clip in folder.GetClipList() or []:
         if clip.GetName() == name:
             return clip
-    for sub in (folder.GetSubFolderList() or []):
+    for sub in folder.GetSubFolderList() or []:
         found = _find_clip(sub, name)
         if found:
             return found
@@ -139,7 +138,7 @@ def _find_folder(folder, name):
     """Recursively find a folder by name."""
     if folder.GetName() == name:
         return folder
-    for sub in (folder.GetSubFolderList() or []):
+    for sub in folder.GetSubFolderList() or []:
         found = _find_folder(sub, name)
         if found:
             return found

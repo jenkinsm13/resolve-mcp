@@ -13,10 +13,10 @@ from .config import mcp
 from .errors import safe_resolve_call
 from .resolve import _boilerplate
 
-
 # ---------------------------------------------------------------------------
 # Dolby Vision
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 @safe_resolve_call
@@ -36,8 +36,7 @@ def resolve_analyze_dolby_vision(timeline_name: str = "") -> str:
     if not tl:
         return "No active timeline."
     r = tl.AnalyzeDolbyVision()
-    return "Dolby Vision analysis started." if r \
-        else "Failed — requires Resolve Studio with Dolby Vision."
+    return "Dolby Vision analysis started." if r else "Failed — requires Resolve Studio with Dolby Vision."
 
 
 @mcp.tool
@@ -55,13 +54,13 @@ def resolve_optimize_dolby_vision() -> str:
     if not tl:
         return "No active timeline."
     r = tl.OptimizeDolbyVision()
-    return "Dolby Vision optimization complete." if r \
-        else "Failed — run analyze first."
+    return "Dolby Vision optimization complete." if r else "Failed — run analyze first."
 
 
 # ---------------------------------------------------------------------------
 # 3D Stereo
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 @safe_resolve_call
@@ -82,8 +81,7 @@ def resolve_convert_timeline_to_stereo() -> str:
 
 @mcp.tool
 @safe_resolve_call
-def resolve_get_stereo_floating_windows(track_type: str, track_index: int,
-                                         item_index: int) -> str:
+def resolve_get_stereo_floating_windows(track_type: str, track_index: int, item_index: int) -> str:
     """Get stereo floating window parameters for a 3D clip.
 
     Returns left and right eye floating window params used to
@@ -101,7 +99,7 @@ def resolve_get_stereo_floating_windows(track_type: str, track_index: int,
     items = tl.GetItemListInTrack(track_type.lower(), int(track_index)) or []
     idx = int(item_index) - 1
     if idx < 0 or idx >= len(items):
-        return f"Item index out of range."
+        return "Item index out of range."
     it = items[idx]
     left = it.GetStereoLeftFloatingWindowParams()
     right = it.GetStereoRightFloatingWindowParams()

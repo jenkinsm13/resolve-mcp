@@ -6,18 +6,19 @@ Uses VideoToolbox on Apple Silicon, libx265 elsewhere.
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 
 from .config import GEMINI_MAX_BYTES, GEMINI_MAX_LONG_EDGE, SAFE_CODECS, log
 from .ffprobe import ffprobe_codec, ffprobe_duration, ffprobe_resolution
 
 
-def _detect_hw_encoder() -> Optional[str]:
+def _detect_hw_encoder() -> str | None:
     """Return the best available hardware HEVC encoder, or None."""
     try:
         result = subprocess.run(
             ["ffmpeg", "-hide_banner", "-encoders"],
-            capture_output=True, text=True, timeout=10,
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         encoders = result.stdout
     except (FileNotFoundError, subprocess.TimeoutExpired):
@@ -29,11 +30,11 @@ def _detect_hw_encoder() -> Optional[str]:
 
 
 # Cache at module load so we don't probe ffmpeg on every file
-_HW_ENCODER: Optional[str] = None
+_HW_ENCODER: str | None = None
 _HW_ENCODER_CHECKED = False
 
 
-def get_hw_encoder() -> Optional[str]:
+def get_hw_encoder() -> str | None:
     global _HW_ENCODER, _HW_ENCODER_CHECKED
     if not _HW_ENCODER_CHECKED:
         _HW_ENCODER = _detect_hw_encoder()
@@ -51,15 +52,12 @@ def _needs_transcode(video_path: Path) -> bool:
     if codec not in SAFE_CODECS:
         return True
     w, h = ffprobe_resolution(video_path)
-    if w is not None and h is not None:
-        if max(w, h) > GEMINI_MAX_LONG_EDGE:
-            return True
-    return False
+    return w is not None and h is not None and max(w, h) > GEMINI_MAX_LONG_EDGE
 
 
 def _pick_quality_params(source_path: Path, duration_sec: float) -> list[str]:
     """Return ffmpeg encoder + quality flags appropriate to the platform."""
-    src_gb = source_path.stat().st_size / (1024 ** 3)
+    src_gb = source_path.stat().st_size / (1024**3)
     hw = get_hw_encoder()
 
     if hw:
@@ -106,13 +104,23 @@ def prepare_for_gemini(video_path: Path) -> Path:
     )
 
     cmd = [
-        "ffmpeg", "-y", "-i", str(video_path),
-        "-vf", scale_filter,
+        "ffmpeg",
+        "-y",
+        "-i",
+        str(video_path),
+        "-vf",
+        scale_filter,
         *encoder_flags,
-        "-pix_fmt", "yuv420p",
-        "-c:a", "aac", "-b:a", "128k",
-        "-movflags", "+faststart",
-        "-map_metadata", "-1",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "128k",
+        "-movflags",
+        "+faststart",
+        "-map_metadata",
+        "-1",
         str(cache_path),
     ]
 
@@ -120,8 +128,7 @@ def prepare_for_gemini(video_path: Path) -> Path:
         subprocess.run(cmd, capture_output=True, text=True, timeout=3600, check=True)
     except FileNotFoundError:
         raise RuntimeError(
-            "ffmpeg not found. Install it: brew install ffmpeg (macOS) "
-            "or download from https://ffmpeg.org"
+            "ffmpeg not found. Install it: brew install ffmpeg (macOS) or download from https://ffmpeg.org"
         )
     except subprocess.CalledProcessError as exc:
         raise RuntimeError(f"ffmpeg transcode failed for {video_path.name}: {exc.stderr[:500]}")
@@ -130,7 +137,7 @@ def prepare_for_gemini(video_path: Path) -> Path:
         log.warning(
             "%s is still %.1f GB after transcode — Gemini may reject it.",
             cache_path.name,
-            cache_path.stat().st_size / (1024 ** 3),
+            cache_path.stat().st_size / (1024**3),
         )
 
     return cache_path

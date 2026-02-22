@@ -9,10 +9,10 @@ rendering, playback, and editing operations.
 from .config import mcp
 from .resolve import _boilerplate
 
-
 # ---------------------------------------------------------------------------
 # Timeline Mark In/Out
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 def resolve_get_timeline_mark_in_out() -> str:
@@ -41,8 +41,7 @@ def resolve_get_timeline_mark_in_out() -> str:
 
 
 @mcp.tool
-def resolve_set_timeline_mark_in_out(mark_in: int, mark_out: int,
-                                       mark_type: str = "all") -> str:
+def resolve_set_timeline_mark_in_out(mark_in: int, mark_out: int, mark_type: str = "all") -> str:
     """Set mark in/out points on the timeline.
 
     *mark_in*: frame number for mark in.
@@ -83,6 +82,7 @@ def resolve_clear_timeline_mark_in_out(mark_type: str = "all") -> str:
 # Media Pool Item Mark In/Out
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 def resolve_get_clip_mark_in_out(clip_name: str) -> str:
     """Get mark in/out points on a media pool clip.
@@ -109,8 +109,7 @@ def resolve_get_clip_mark_in_out(clip_name: str) -> str:
 
 
 @mcp.tool
-def resolve_set_clip_mark_in_out(clip_name: str, mark_in: int, mark_out: int,
-                                   mark_type: str = "all") -> str:
+def resolve_set_clip_mark_in_out(clip_name: str, mark_in: int, mark_out: int, mark_type: str = "all") -> str:
     """Set mark in/out points on a media pool clip.
 
     *clip_name*: name of the clip in the media pool.
@@ -148,10 +147,10 @@ def resolve_clear_clip_mark_in_out(clip_name: str, mark_type: str = "all") -> st
 
 def _find_clip(folder, name):
     """Recursively search for a clip by name."""
-    for clip in (folder.GetClipList() or []):
+    for clip in folder.GetClipList() or []:
         if clip.GetName() == name:
             return clip
-    for sub in (folder.GetSubFolderList() or []):
+    for sub in folder.GetSubFolderList() or []:
         found = _find_clip(sub, name)
         if found:
             return found

@@ -3,8 +3,8 @@
 import json
 
 from .config import mcp
-from .resolve import _boilerplate, _find_bin
 from .media_pool_query_tools import _resolve_clip, _resolve_clips
+from .resolve import _boilerplate, _find_bin
 
 
 @mcp.tool
@@ -148,4 +148,8 @@ def resolve_auto_sync_audio(bin_name: str, mode: str = "timecode") -> str:
         return f"No clips in bin '{bin_name}'."
     mode_int = {"timecode": 0, "waveform": 1}.get(mode.lower(), 0)
     result = media_pool.AutoSyncAudio(clips, mode_int)
-    return f"Auto-synced {len(clips)} clip(s) in '{bin_name}' using {mode} mode." if result else f"Auto-sync failed for clips in '{bin_name}'."
+    return (
+        f"Auto-synced {len(clips)} clip(s) in '{bin_name}' using {mode} mode."
+        if result
+        else f"Auto-sync failed for clips in '{bin_name}'."
+    )

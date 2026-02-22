@@ -5,21 +5,27 @@ and audio info from media files.
 
 import subprocess
 from pathlib import Path
-from typing import Optional
 
 
-def ffprobe_codec(video_path: Path) -> Optional[str]:
+def ffprobe_codec(video_path: Path) -> str | None:
     """Return the lowercase video codec name via ffprobe, or None on failure."""
     try:
         result = subprocess.run(
             [
-                "ffprobe", "-v", "error",
-                "-select_streams", "v:0",
-                "-show_entries", "stream=codec_name",
-                "-of", "csv=p=0",
+                "ffprobe",
+                "-v",
+                "error",
+                "-select_streams",
+                "v:0",
+                "-show_entries",
+                "stream=codec_name",
+                "-of",
+                "csv=p=0",
                 str(video_path),
             ],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         codec = result.stdout.strip().lower()
         return codec if codec else None
@@ -27,24 +33,30 @@ def ffprobe_codec(video_path: Path) -> Optional[str]:
         return None
 
 
-def ffprobe_duration(video_path: Path) -> Optional[float]:
+def ffprobe_duration(video_path: Path) -> float | None:
     """Return duration in seconds via ffprobe, or None."""
     try:
         result = subprocess.run(
             [
-                "ffprobe", "-v", "error",
-                "-show_entries", "format=duration",
-                "-of", "csv=p=0",
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_entries",
+                "format=duration",
+                "-of",
+                "csv=p=0",
                 str(video_path),
             ],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         return float(result.stdout.strip())
     except (FileNotFoundError, subprocess.TimeoutExpired, ValueError):
         return None
 
 
-def ffprobe_fps(video_path: Path) -> Optional[float]:
+def ffprobe_fps(video_path: Path) -> float | None:
     """Return average frame rate via ffprobe, or None.
 
     Parses r_frame_rate (rational like '30000/1001' for 29.97) and
@@ -54,13 +66,20 @@ def ffprobe_fps(video_path: Path) -> Optional[float]:
     try:
         result = subprocess.run(
             [
-                "ffprobe", "-v", "error",
-                "-select_streams", "v:0",
-                "-show_entries", "stream=r_frame_rate",
-                "-of", "csv=p=0",
+                "ffprobe",
+                "-v",
+                "error",
+                "-select_streams",
+                "v:0",
+                "-show_entries",
+                "stream=r_frame_rate",
+                "-of",
+                "csv=p=0",
                 str(video_path),
             ],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         raw = result.stdout.strip()
         if "/" in raw:
@@ -71,7 +90,7 @@ def ffprobe_fps(video_path: Path) -> Optional[float]:
         return None
 
 
-def ffprobe_start_tc(video_path: Path) -> Optional[str]:
+def ffprobe_start_tc(video_path: Path) -> str | None:
     """Return the embedded start timecode string (e.g. '14:40:52:00') via ffprobe.
 
     Tries stream-level timecode first (most reliable for camera footage),
@@ -84,13 +103,20 @@ def ffprobe_start_tc(video_path: Path) -> Optional[str]:
         try:
             result = subprocess.run(
                 [
-                    "ffprobe", "-v", "error",
-                    "-select_streams", "v:0",
-                    "-show_entries", show_entries,
-                    "-of", "csv=p=0",
+                    "ffprobe",
+                    "-v",
+                    "error",
+                    "-select_streams",
+                    "v:0",
+                    "-show_entries",
+                    show_entries,
+                    "-of",
+                    "csv=p=0",
                     str(video_path),
                 ],
-                capture_output=True, text=True, timeout=30,
+                capture_output=True,
+                text=True,
+                timeout=30,
             )
             tc = result.stdout.strip().strip(",")
             if tc and ":" in tc:
@@ -118,18 +144,25 @@ def tc_to_frames(tc_str: str, fps: float) -> int:
     return h * 3600 * fps_int + m * 60 * fps_int + s * fps_int + f
 
 
-def ffprobe_resolution(video_path: Path) -> tuple[Optional[int], Optional[int]]:
+def ffprobe_resolution(video_path: Path) -> tuple[int | None, int | None]:
     """Return (width, height) via ffprobe, or (None, None)."""
     try:
         result = subprocess.run(
             [
-                "ffprobe", "-v", "error",
-                "-select_streams", "v:0",
-                "-show_entries", "stream=width,height",
-                "-of", "csv=p=0",
+                "ffprobe",
+                "-v",
+                "error",
+                "-select_streams",
+                "v:0",
+                "-show_entries",
+                "stream=width,height",
+                "-of",
+                "csv=p=0",
                 str(video_path),
             ],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         parts = result.stdout.strip().split(",")
         return int(parts[0]), int(parts[1])
@@ -142,13 +175,20 @@ def ffprobe_audio_info(audio_path: Path) -> tuple[int, int]:
     try:
         result = subprocess.run(
             [
-                "ffprobe", "-v", "error",
-                "-select_streams", "a:0",
-                "-show_entries", "stream=sample_rate,channels",
-                "-of", "csv=p=0",
+                "ffprobe",
+                "-v",
+                "error",
+                "-select_streams",
+                "a:0",
+                "-show_entries",
+                "stream=sample_rate,channels",
+                "-of",
+                "csv=p=0",
                 str(audio_path),
             ],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         parts = result.stdout.strip().split(",")
         return int(parts[0]), int(parts[1])

@@ -25,8 +25,7 @@ from .resolve import _boilerplate
 log = logging.getLogger(__name__)
 
 
-def _get_comp(project, track_type=None, track_index=None,
-              item_index=None, comp_name=None):
+def _get_comp(project, track_type=None, track_index=None, item_index=None, comp_name=None):
     """Get a Fusion composition.
 
     If track/item args are provided, gets the comp from that timeline item.
@@ -76,6 +75,7 @@ def _get_comp(project, track_type=None, track_index=None,
 # Comp introspection
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
 def resolve_fusion_list_tools(comp_name: str = "") -> str:
@@ -93,7 +93,7 @@ def resolve_fusion_list_tools(comp_name: str = "") -> str:
     if not tool_list:
         return "Comp is empty (no tools)."
     lines = [f"{len(tool_list)} tool(s) in comp:"]
-    for _idx, tool in (tool_list.items() if isinstance(tool_list, dict) else enumerate(tool_list)):
+    for _idx, tool in tool_list.items() if isinstance(tool_list, dict) else enumerate(tool_list):
         name = tool.Name if hasattr(tool, "Name") else str(tool)
         tid = tool.ID if hasattr(tool, "ID") else "unknown"
         lines.append(f"  {name}: {tid}")
@@ -119,7 +119,7 @@ def resolve_fusion_get_tool_inputs(tool_name: str, comp_name: str = "") -> str:
         return f"Tool '{tool_name}' not found."
     inputs = tool.GetInputList() or {}
     lines = [f"Inputs for {tool_name}:"]
-    for key, inp in (inputs.items() if isinstance(inputs, dict) else enumerate(inputs)):
+    for key, inp in inputs.items() if isinstance(inputs, dict) else enumerate(inputs):
         try:
             name = inp.GetAttrs("INPS_Name") if hasattr(inp, "GetAttrs") else str(inp)
             val = tool.GetInput(str(name)) if name else None
@@ -133,11 +133,10 @@ def resolve_fusion_get_tool_inputs(tool_name: str, comp_name: str = "") -> str:
 # Tool creation & deletion
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_fusion_add_tool(tool_id: str, name: str = "",
-                             x: int = 0, y: int = 0,
-                             comp_name: str = "") -> str:
+def resolve_fusion_add_tool(tool_id: str, name: str = "", x: int = 0, y: int = 0, comp_name: str = "") -> str:
     """Add a tool to the Fusion composition.
 
     Common tool IDs:
@@ -207,12 +206,12 @@ def resolve_fusion_remove_tool(tool_name: str, comp_name: str = "") -> str:
 # Connections
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_fusion_connect(from_tool: str, to_tool: str,
-                            from_output: str = "Output",
-                            to_input: str = "Background",
-                            comp_name: str = "") -> str:
+def resolve_fusion_connect(
+    from_tool: str, to_tool: str, from_output: str = "Output", to_input: str = "Background", comp_name: str = ""
+) -> str:
     """Connect the output of one tool to the input of another.
 
     Common connection patterns:
@@ -257,8 +256,7 @@ def resolve_fusion_connect(from_tool: str, to_tool: str,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_fusion_disconnect(tool_name: str, input_name: str,
-                               comp_name: str = "") -> str:
+def resolve_fusion_disconnect(tool_name: str, input_name: str, comp_name: str = "") -> str:
     """Disconnect an input on a Fusion tool.
 
     Args:
@@ -282,10 +280,10 @@ def resolve_fusion_disconnect(tool_name: str, input_name: str,
 # Parameter control
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_fusion_set_input(tool_name: str, input_name: str,
-                              value: str, comp_name: str = "") -> str:
+def resolve_fusion_set_input(tool_name: str, input_name: str, value: str, comp_name: str = "") -> str:
     """Set a parameter value on a Fusion tool.
 
     Values are auto-converted: numbers become float, 'true'/'false' become
@@ -323,8 +321,7 @@ def resolve_fusion_set_input(tool_name: str, input_name: str,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_fusion_get_input(tool_name: str, input_name: str,
-                              comp_name: str = "") -> str:
+def resolve_fusion_get_input(tool_name: str, input_name: str, comp_name: str = "") -> str:
     """Read the current value of a parameter on a Fusion tool.
 
     Args:
@@ -345,11 +342,10 @@ def resolve_fusion_get_input(tool_name: str, input_name: str,
 # Keyframes
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_fusion_set_keyframe(tool_name: str, input_name: str,
-                                 frame: int, value: str,
-                                 comp_name: str = "") -> str:
+def resolve_fusion_set_keyframe(tool_name: str, input_name: str, frame: int, value: str, comp_name: str = "") -> str:
     """Set a keyframe on a tool input at a specific frame.
 
     This enables animation — set different values at different frames and
@@ -378,8 +374,7 @@ def resolve_fusion_set_keyframe(tool_name: str, input_name: str,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_fusion_get_keyframes(tool_name: str, input_name: str,
-                                  comp_name: str = "") -> str:
+def resolve_fusion_get_keyframes(tool_name: str, input_name: str, comp_name: str = "") -> str:
     """Get all keyframes on a tool input.
 
     Returns frame→value pairs for animated parameters.
@@ -406,6 +401,7 @@ def resolve_fusion_get_keyframes(tool_name: str, input_name: str,
 # ---------------------------------------------------------------------------
 # Comp-level controls
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 @safe_resolve_call
@@ -441,8 +437,7 @@ def resolve_fusion_get_comp_time(comp_name: str = "") -> str:
 
 @mcp.tool
 @safe_resolve_call
-def resolve_fusion_render_comp(start_frame: int = -1, end_frame: int = -1,
-                                comp_name: str = "") -> str:
+def resolve_fusion_render_comp(start_frame: int = -1, end_frame: int = -1, comp_name: str = "") -> str:
     """Render the current Fusion composition.
 
     If start/end are -1, renders the full comp range.
@@ -464,6 +459,7 @@ def resolve_fusion_render_comp(start_frame: int = -1, end_frame: int = -1,
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _convert_value(value_str: str):
     """Auto-convert string value to appropriate Python type for Fusion."""

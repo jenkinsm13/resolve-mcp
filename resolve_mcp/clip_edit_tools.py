@@ -2,14 +2,13 @@
 
 import json
 
+from .clip_query_tools import _get_item
 from .config import mcp
 from .resolve import _boilerplate
-from .clip_query_tools import _get_item
 
 
 @mcp.tool
-def resolve_set_item_properties(track_type: str, track_index: int,
-                                 item_index: int, properties_json: str) -> str:
+def resolve_set_item_properties(track_type: str, track_index: int, item_index: int, properties_json: str) -> str:
     """Set properties on a timeline item.
 
     *properties_json*: JSON object with property names and values.
@@ -31,8 +30,7 @@ def resolve_set_item_properties(track_type: str, track_index: int,
 
 
 @mcp.tool
-def resolve_set_clip_enabled(track_type: str, track_index: int,
-                              item_index: int, enabled: bool = True) -> str:
+def resolve_set_clip_enabled(track_type: str, track_index: int, item_index: int, enabled: bool = True) -> str:
     """Enable or disable a clip on the timeline."""
     _, project, _ = _boilerplate()
     try:
@@ -40,12 +38,15 @@ def resolve_set_clip_enabled(track_type: str, track_index: int,
     except ValueError as e:
         return str(e)
     state = "enabled" if enabled else "disabled"
-    return f"Clip {item_index} on {track_type} track {track_index} {state}." if item.SetClipEnabled(enabled) else f"Failed to set clip {state}."
+    return (
+        f"Clip {item_index} on {track_type} track {track_index} {state}."
+        if item.SetClipEnabled(enabled)
+        else f"Failed to set clip {state}."
+    )
 
 
 @mcp.tool
-def resolve_set_clip_color_on_timeline(track_type: str, track_index: int,
-                                        item_index: int, color: str) -> str:
+def resolve_set_clip_color_on_timeline(track_type: str, track_index: int, item_index: int, color: str) -> str:
     """Set the color tag of a clip on the timeline.
 
     Valid colors: Orange, Apricot, Yellow, Lime, Olive, Green, Teal, Navy,
@@ -56,12 +57,15 @@ def resolve_set_clip_color_on_timeline(track_type: str, track_index: int,
         _, item = _get_item(project, track_type, track_index, item_index)
     except ValueError as e:
         return str(e)
-    return f"Set color '{color}' on clip {item_index}." if item.SetClipColor(color) else f"Failed to set color '{color}'."
+    return (
+        f"Set color '{color}' on clip {item_index}." if item.SetClipColor(color) else f"Failed to set color '{color}'."
+    )
 
 
 @mcp.tool
-def resolve_delete_clips_from_timeline(track_type: str, track_index: int,
-                                        item_indices: str, ripple: bool = False) -> str:
+def resolve_delete_clips_from_timeline(
+    track_type: str, track_index: int, item_indices: str, ripple: bool = False
+) -> str:
     """Delete clips from the timeline.
 
     *item_indices*: comma-separated 1-based indices (e.g. '1,3,5').
@@ -89,8 +93,7 @@ def resolve_delete_clips_from_timeline(track_type: str, track_index: int,
 
 
 @mcp.tool
-def resolve_link_clips(track_type: str, track_index: int,
-                        item_indices: str, linked: bool = True) -> str:
+def resolve_link_clips(track_type: str, track_index: int, item_indices: str, linked: bool = True) -> str:
     """Link or unlink clips on the timeline.
 
     *item_indices*: comma-separated 1-based indices to link together.
@@ -107,12 +110,15 @@ def resolve_link_clips(track_type: str, track_index: int,
     if len(selected) < 2:
         return "Need at least 2 valid items to link/unlink."
     action = "linked" if linked else "unlinked"
-    return f"{len(selected)} clips {action}." if tl.SetClipsLinked(selected, linked) else f"Failed to {action[:-2]} clips."
+    return (
+        f"{len(selected)} clips {action}." if tl.SetClipsLinked(selected, linked) else f"Failed to {action[:-2]} clips."
+    )
 
 
 @mcp.tool
-def resolve_create_compound_clip(track_type: str, track_index: int,
-                                  item_indices: str, name: str = "Compound Clip") -> str:
+def resolve_create_compound_clip(
+    track_type: str, track_index: int, item_indices: str, name: str = "Compound Clip"
+) -> str:
     """Create a compound clip from selected items on a track.
 
     *item_indices*: comma-separated 1-based indices.
@@ -128,7 +134,11 @@ def resolve_create_compound_clip(track_type: str, track_index: int,
     selected = [items[i - 1] for i in indices if 1 <= i <= len(items)]
     if not selected:
         return "No valid items selected."
-    return f"Created compound clip '{name}' from {len(selected)} items." if tl.CreateCompoundClip(selected, {"name": name}) else "Failed to create compound clip."
+    return (
+        f"Created compound clip '{name}' from {len(selected)} items."
+        if tl.CreateCompoundClip(selected, {"name": name})
+        else "Failed to create compound clip."
+    )
 
 
 @mcp.tool
@@ -139,7 +149,11 @@ def resolve_stabilize_clip(track_type: str, track_index: int, item_index: int) -
         _, item = _get_item(project, track_type, track_index, item_index)
     except ValueError as e:
         return str(e)
-    return f"Stabilization applied to clip {item_index}." if item.Stabilize() else "Stabilization failed. Requires Resolve Studio."
+    return (
+        f"Stabilization applied to clip {item_index}."
+        if item.Stabilize()
+        else "Stabilization failed. Requires Resolve Studio."
+    )
 
 
 @mcp.tool
@@ -150,4 +164,8 @@ def resolve_smart_reframe(track_type: str, track_index: int, item_index: int) ->
         _, item = _get_item(project, track_type, track_index, item_index)
     except ValueError as e:
         return str(e)
-    return f"Smart Reframe applied to clip {item_index}." if item.SmartReframe() else "Smart Reframe failed. Requires Resolve Studio."
+    return (
+        f"Smart Reframe applied to clip {item_index}."
+        if item.SmartReframe()
+        else "Smart Reframe failed. Requires Resolve Studio."
+    )

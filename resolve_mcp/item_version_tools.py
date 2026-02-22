@@ -25,10 +25,10 @@ def _item(project, track_type, track_index, item_index):
 # Versions
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_item_list_versions(track_type: str, track_index: int,
-                                item_index: int) -> str:
+def resolve_item_list_versions(track_type: str, track_index: int, item_index: int) -> str:
     """List all clip versions on a timeline item.
 
     Args:
@@ -53,9 +53,9 @@ def resolve_item_list_versions(track_type: str, track_index: int,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_add_version(track_type: str, track_index: int,
-                              item_index: int, version_name: str,
-                              version_type: int = 0) -> str:
+def resolve_item_add_version(
+    track_type: str, track_index: int, item_index: int, version_name: str, version_type: int = 0
+) -> str:
     """Create a new clip version.
 
     Args:
@@ -75,9 +75,9 @@ def resolve_item_add_version(track_type: str, track_index: int,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_load_version(track_type: str, track_index: int,
-                               item_index: int, version_name: str,
-                               version_type: int = 0) -> str:
+def resolve_item_load_version(
+    track_type: str, track_index: int, item_index: int, version_name: str, version_type: int = 0
+) -> str:
     """Switch to a specific clip version.
 
     Args:
@@ -97,9 +97,9 @@ def resolve_item_load_version(track_type: str, track_index: int,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_delete_version(track_type: str, track_index: int,
-                                 item_index: int, version_name: str,
-                                 version_type: int = 0) -> str:
+def resolve_item_delete_version(
+    track_type: str, track_index: int, item_index: int, version_name: str, version_type: int = 0
+) -> str:
     """Delete a clip version.
 
     Args:
@@ -119,10 +119,9 @@ def resolve_item_delete_version(track_type: str, track_index: int,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_rename_version(track_type: str, track_index: int,
-                                 item_index: int, old_name: str,
-                                 new_name: str,
-                                 version_type: int = 0) -> str:
+def resolve_item_rename_version(
+    track_type: str, track_index: int, item_index: int, old_name: str, new_name: str, version_type: int = 0
+) -> str:
     """Rename a clip version.
 
     Args:
@@ -145,10 +144,10 @@ def resolve_item_rename_version(track_type: str, track_index: int,
 # Color group assignment
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_item_get_color_group(track_type: str, track_index: int,
-                                  item_index: int) -> str:
+def resolve_item_get_color_group(track_type: str, track_index: int, item_index: int) -> str:
     """Get the color group assigned to a timeline item.
 
     Args:
@@ -169,9 +168,7 @@ def resolve_item_get_color_group(track_type: str, track_index: int,
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_set_color_group(track_type: str, track_index: int,
-                                  item_index: int,
-                                  group_name: str) -> str:
+def resolve_item_set_color_group(track_type: str, track_index: int, item_index: int, group_name: str) -> str:
     """Assign a color group to a timeline item.
 
     Args:
@@ -202,11 +199,12 @@ def resolve_item_set_color_group(track_type: str, track_index: int,
 # Grade from still / gallery
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_item_assign_grade_from_album(track_type: str, track_index: int,
-                                          item_index: int,
-                                          still_index: int = 0) -> str:
+def resolve_item_assign_grade_from_album(
+    track_type: str, track_index: int, item_index: int, still_index: int = 0
+) -> str:
     """Apply grade from a gallery still to a timeline item.
 
     Args:
@@ -228,7 +226,7 @@ def resolve_item_assign_grade_from_album(track_type: str, track_index: int,
         return "No current still album."
     stills = album.GetStills() or []
     if still_index >= len(stills):
-        return f"Still index {still_index} out of range (0–{len(stills)-1})."
+        return f"Still index {still_index} out of range (0–{len(stills) - 1})."
     r = it.AssignStillFromGallery(stills[still_index])
     return "Grade applied from still." if r else "Failed."
 
@@ -237,10 +235,10 @@ def resolve_item_assign_grade_from_album(track_type: str, track_index: int,
 # Stereo convergence (niche — 3D workflows)
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
-def resolve_item_get_stereo_convergence(track_type: str, track_index: int,
-                                         item_index: int) -> str:
+def resolve_item_get_stereo_convergence(track_type: str, track_index: int, item_index: int) -> str:
     """Get stereo convergence values for a 3D timeline item.
 
     Args:

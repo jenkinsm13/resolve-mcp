@@ -2,8 +2,8 @@
 Per-clip transform helpers: zoom/pan/tilt (SetProperty) and Fusion speed ramps.
 """
 
+import contextlib
 import logging
-from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -26,9 +26,9 @@ def _apply_clip_transform(item, cut: dict) -> None:
     """
     try:
         zoom = cut.get("zoom")
-        pan  = cut.get("pan")
+        pan = cut.get("pan")
         tilt = cut.get("tilt")
-        dze  = cut.get("dynamic_zoom_ease")
+        dze = cut.get("dynamic_zoom_ease")
 
         if zoom is not None:
             z = float(zoom)
@@ -39,8 +39,7 @@ def _apply_clip_transform(item, cut: dict) -> None:
         if tilt is not None:
             item.SetProperty("Tilt", float(tilt))
         if dze is not None:
-            item.SetProperty("DynamicZoomEase",
-                             _DYNAMIC_ZOOM_EASE.get(str(dze).lower(), 0))
+            item.SetProperty("DynamicZoomEase", _DYNAMIC_ZOOM_EASE.get(str(dze).lower(), 0))
     except Exception as exc:
         log.warning("Clip transform failed: %s", exc)
 
@@ -138,10 +137,8 @@ def _apply_speed_ramp(item, ramp_points: list, fps: float) -> bool:
             return False
 
         for out_frame, src_frame in _bake_speed_ramp(ramp_points, fps):
-            try:
+            with contextlib.suppress(Exception):
                 ts.SetInput(time_input, float(src_frame), int(out_frame))
-            except Exception:
-                pass
         return True
 
     except Exception as exc:

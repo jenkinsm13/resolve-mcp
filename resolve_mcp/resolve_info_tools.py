@@ -4,7 +4,7 @@ Resolve info tools: project summary, bin listing, and item property inspector.
 
 import json
 
-from .config import log, mcp
+from .config import mcp
 from .resolve import _boilerplate, _enumerate_bins
 
 
@@ -29,24 +29,29 @@ def resolve_get_info() -> str:
 
     root = media_pool.GetRootFolder()
     bin_tree = []
-    for top in ([root] + list(root.GetSubFolderList() or [])):
+    for top in [root] + list(root.GetSubFolderList() or []):
         top_clips = top.GetClipList() or []
         children = []
-        for sub in (top.GetSubFolderList() or []):
+        for sub in top.GetSubFolderList() or []:
             sub_clips = sub.GetClipList() or []
             children.append({"name": sub.GetName(), "clip_count": len(sub_clips)})
-        bin_tree.append({
-            "name": top.GetName(),
-            "clip_count": len(top_clips),
-            "subfolders": children,
-        })
+        bin_tree.append(
+            {
+                "name": top.GetName(),
+                "clip_count": len(top_clips),
+                "subfolders": children,
+            }
+        )
 
-    return json.dumps({
-        "project_name": project.GetName(),
-        "timeline_count": tl_count,
-        "timelines": timeline_names,
-        "bin_tree": bin_tree,
-    }, indent=2)
+    return json.dumps(
+        {
+            "project_name": project.GetName(),
+            "timeline_count": tl_count,
+            "timelines": timeline_names,
+            "bin_tree": bin_tree,
+        },
+        indent=2,
+    )
 
 
 @mcp.tool
@@ -98,15 +103,33 @@ def resolve_inspect_item(track: int = 1, item_index: int = 0) -> str:
     item = items[item_index]
 
     known_keys = [
-        "Pan", "Tilt", "ZoomX", "ZoomY", "ZoomGang",
-        "RotationAngle", "AnchorPointX", "AnchorPointY",
-        "Pitch", "Yaw", "FlipX", "FlipY",
-        "CropLeft", "CropRight", "CropTop", "CropBottom",
-        "CropSoftness", "CropRetain",
+        "Pan",
+        "Tilt",
+        "ZoomX",
+        "ZoomY",
+        "ZoomGang",
+        "RotationAngle",
+        "AnchorPointX",
+        "AnchorPointY",
+        "Pitch",
+        "Yaw",
+        "FlipX",
+        "FlipY",
+        "CropLeft",
+        "CropRight",
+        "CropTop",
+        "CropBottom",
+        "CropSoftness",
+        "CropRetain",
         "DynamicZoomEase",
-        "Opacity", "RetimeProcess", "MotionEstimation",
-        "SteadiAnalysisType", "SteadiSmooth",
-        "CompositeMode", "Speed", "FreezeFrame",
+        "Opacity",
+        "RetimeProcess",
+        "MotionEstimation",
+        "SteadiAnalysisType",
+        "SteadiSmooth",
+        "CompositeMode",
+        "Speed",
+        "FreezeFrame",
     ]
 
     props: dict = {}
@@ -131,10 +154,13 @@ def resolve_inspect_item(track: int = 1, item_index: int = 0) -> str:
     except Exception:
         pass
 
-    return json.dumps({
-        "track": track,
-        "item_index": item_index,
-        "clip_name": clip_name,
-        "duration_frames": item.GetDuration(),
-        "properties": props,
-    }, indent=2)
+    return json.dumps(
+        {
+            "track": track,
+            "item_index": item_index,
+            "clip_name": clip_name,
+            "duration_frames": item.GetDuration(),
+            "properties": props,
+        },
+        indent=2,
+    )

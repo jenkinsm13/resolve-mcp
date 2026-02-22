@@ -5,16 +5,13 @@ Covers: Timeline markers (add, delete, list, update custom data),
 playhead position (get/set timecode), and marker-based queries.
 """
 
-import json
-from typing import Optional
-
 from .config import mcp
 from .resolve import _boilerplate
-
 
 # ---------------------------------------------------------------------------
 # MCP Tools
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 def resolve_list_markers(target: str = "timeline") -> str:
@@ -60,10 +57,9 @@ def resolve_list_markers(target: str = "timeline") -> str:
 
 
 @mcp.tool
-def resolve_add_marker_at(seconds: float, color: str = "Blue",
-                           name: str = "", note: str = "",
-                           duration: int = 1,
-                           custom_data: str = "") -> str:
+def resolve_add_marker_at(
+    seconds: float, color: str = "Blue", name: str = "", note: str = "", duration: int = 1, custom_data: str = ""
+) -> str:
     """Add a marker to the current timeline at a specific time.
 
     *seconds*: position in seconds from timeline start.

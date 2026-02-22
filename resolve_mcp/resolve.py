@@ -7,28 +7,33 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Optional
 
 log = logging.getLogger(__name__)
 
 # Resolve-recognised frame-rate strings keyed by rounded float value.
 _FPS_MAP: dict[float, str] = {
-    23.976: "23.976", 24.0: "24", 25.0: "25",
-    29.97: "29.97", 30.0: "30", 48.0: "48",
-    50.0: "50", 59.94: "59.94", 60.0: "60",
-    119.88: "119.88", 120.0: "120",
+    23.976: "23.976",
+    24.0: "24",
+    25.0: "25",
+    29.97: "29.97",
+    30.0: "30",
+    48.0: "48",
+    50.0: "50",
+    59.94: "59.94",
+    60.0: "60",
+    119.88: "119.88",
+    120.0: "120",
 }
 
 
-def _resolve_module_path() -> Optional[str]:
+def _resolve_module_path() -> str | None:
     """Return the Resolve scripting modules directory for the current platform."""
     override = os.getenv("RESOLVE_SCRIPT_API")
     if override and os.path.isdir(override):
         return override
 
     platform_paths = {
-        "darwin": "/Library/Application Support/Blackmagic Design/"
-                  "DaVinci Resolve/Developer/Scripting/Modules/",
+        "darwin": "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Developer/Scripting/Modules/",
         "win32": os.path.expandvars(
             r"%PROGRAMDATA%\Blackmagic Design\DaVinci Resolve"
             r"\Support\Developer\Scripting\Modules\\"
@@ -48,6 +53,7 @@ def get_resolve():
         sys.path.insert(0, mod_path)
     try:
         import DaVinciResolveScript as dvr_script  # type: ignore
+
         return dvr_script.scriptapp("Resolve")
     except (ImportError, AttributeError):
         return None
@@ -97,8 +103,7 @@ def _require_studio(feature_name: str) -> None:
     """Raise ValueError if not running Resolve Studio."""
     if not is_studio():
         raise ValueError(
-            f"'{feature_name}' requires DaVinci Resolve Studio. "
-            f"The free edition does not support this feature."
+            f"'{feature_name}' requires DaVinci Resolve Studio. The free edition does not support this feature."
         )
 
 
@@ -109,14 +114,14 @@ def _collect_clips_recursive(folder) -> dict:
     Resolve returns ``None`` (not ``[]``) for empty lists — guarded with ``or []``.
     """
     result: dict[str, object] = {}
-    for clip in (folder.GetClipList() or []):
+    for clip in folder.GetClipList() or []:
         try:
             name = clip.GetName()
         except Exception:
             continue
         result[Path(name).stem] = clip
         result[name] = clip
-    for sub in (folder.GetSubFolderList() or []):
+    for sub in folder.GetSubFolderList() or []:
         result.update(_collect_clips_recursive(sub))
     return result
 
@@ -141,7 +146,7 @@ def _find_bin(root_folder, bin_path: str):
     def _search(folder):
         if folder.GetName() == bin_path:
             return folder
-        for sub in (folder.GetSubFolderList() or []):
+        for sub in folder.GetSubFolderList() or []:
             result = _search(sub)
             if result is not None:
                 return result
@@ -156,13 +161,14 @@ def _enumerate_bins(folder, prefix: str = "") -> list:
     path = f"{prefix}/{name}" if prefix else name
     clips = folder.GetClipList() or []
     entries = [{"path": path, "clip_count": len(clips)}]
-    for sub in (folder.GetSubFolderList() or []):
+    for sub in folder.GetSubFolderList() or []:
         entries.extend(_enumerate_bins(sub, path))
     return entries
 
 
 def _unique_timeline_name(media_pool, base_name: str) -> tuple:
     """Return *(name, timeline)* using *base_name* or an auto-suffixed variant."""
+
     def _try(name):
         tl = media_pool.CreateEmptyTimeline(name)
         return (name, tl) if tl else None
@@ -182,9 +188,15 @@ def _unique_timeline_name(media_pool, base_name: str) -> tuple:
 # ---------------------------------------------------------------------------
 # Backward-compatible re-exports (implementation moved to submodules)
 # ---------------------------------------------------------------------------
-from .resolve_transforms import (  # noqa: F401
-    _DYNAMIC_ZOOM_EASE, _apply_clip_transform, _bake_speed_ramp, _apply_speed_ramp,
-)
 from .resolve_build import (  # noqa: F401
-    build_timeline_direct, read_timeline_markers, markers_to_slots, try_resolve_import,
+    build_timeline_direct,
+    markers_to_slots,
+    read_timeline_markers,
+    try_resolve_import,
+)
+from .resolve_transforms import (  # noqa: F401
+    _DYNAMIC_ZOOM_EASE,
+    _apply_clip_transform,
+    _apply_speed_ramp,
+    _bake_speed_ramp,
 )

@@ -51,7 +51,11 @@ def resolve_set_render_settings(settings_json: str) -> str:
         return f"Invalid JSON: {exc}"
 
     result = project.SetRenderSettings(settings)
-    return f"Render settings updated ({len(settings)} key(s))." if result else "Failed to apply render settings. Check key names and values."
+    return (
+        f"Render settings updated ({len(settings)} key(s))."
+        if result
+        else "Failed to apply render settings. Check key names and values."
+    )
 
 
 @mcp.tool
@@ -62,7 +66,11 @@ def resolve_load_render_preset(preset_name: str) -> str:
     """
     _, project, _ = _boilerplate()
     result = project.LoadRenderPreset(preset_name)
-    return f"Loaded render preset '{preset_name}'." if result else f"Failed to load preset '{preset_name}'. Check the name."
+    return (
+        f"Loaded render preset '{preset_name}'."
+        if result
+        else f"Failed to load preset '{preset_name}'. Check the name."
+    )
 
 
 @mcp.tool
@@ -83,4 +91,8 @@ def resolve_set_render_format_and_codec(format_name: str, codec_name: str) -> st
     """
     _, project, _ = _boilerplate()
     result = project.SetCurrentRenderFormatAndCodec(format_name, codec_name)
-    return f"Render format set to {format_name} / {codec_name}." if result else "Failed. Check format/codec names with resolve_get_render_formats()."
+    return (
+        f"Render format set to {format_name} / {codec_name}."
+        if result
+        else "Failed. Check format/codec names with resolve_get_render_formats()."
+    )

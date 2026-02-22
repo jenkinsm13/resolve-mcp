@@ -6,8 +6,8 @@ import threading
 from pathlib import Path
 
 from .config import mcp
+from .ingest import _active_workers, _ingest_worker
 from .resolve import _boilerplate, _find_bin
-from .ingest import _ingest_worker, _active_workers
 
 
 def _dirs_from_bin(media_pool, bin_name: str) -> tuple:

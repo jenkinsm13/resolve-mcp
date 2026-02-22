@@ -4,14 +4,13 @@ export metadata, unlink clips, delete folders, unique IDs.
 """
 
 import json
-from typing import Optional
 
 from .config import mcp
 from .errors import safe_resolve_call
-from .resolve import _boilerplate, _find_bin, _collect_clips_recursive
-
+from .resolve import _boilerplate, _collect_clips_recursive, _find_bin
 
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 @safe_resolve_call
@@ -27,9 +26,7 @@ def resolve_refresh_folders() -> str:
 
 @mcp.tool
 @safe_resolve_call
-def resolve_create_timeline_from_clips(timeline_name: str,
-                                        clip_names: str,
-                                        bin_name: str = "") -> str:
+def resolve_create_timeline_from_clips(timeline_name: str, clip_names: str, bin_name: str = "") -> str:
     """Create a new timeline from specific clips.
 
     *clip_names*: comma-separated clip names in the pool.
@@ -51,14 +48,16 @@ def resolve_create_timeline_from_clips(timeline_name: str,
         return "No matching clips found."
 
     tl = mp.CreateTimelineFromClips(timeline_name, clips)
-    return f"Timeline '{timeline_name}' created with {len(clips)} clip(s)." if tl \
+    return (
+        f"Timeline '{timeline_name}' created with {len(clips)} clip(s)."
+        if tl
         else "Failed to create timeline from clips."
+    )
 
 
 @mcp.tool
 @safe_resolve_call
-def resolve_import_timeline_from_file(file_path: str,
-                                       import_options: str = "{}") -> str:
+def resolve_import_timeline_from_file(file_path: str, import_options: str = "{}") -> str:
     """Import a timeline from an external file (AAF, EDL, XML, FCPXML, OTIO).
 
     *import_options*: optional JSON with import settings like
@@ -73,16 +72,13 @@ def resolve_import_timeline_from_file(file_path: str,
         opts = json.loads(import_options)
     except json.JSONDecodeError:
         opts = {}
-    tl = mp.ImportTimelineFromFile(file_path, opts) if opts \
-        else mp.ImportTimelineFromFile(file_path)
-    return f"Timeline imported from {file_path}" if tl \
-        else f"Import failed for {file_path}."
+    tl = mp.ImportTimelineFromFile(file_path, opts) if opts else mp.ImportTimelineFromFile(file_path)
+    return f"Timeline imported from {file_path}" if tl else f"Import failed for {file_path}."
 
 
 @mcp.tool
 @safe_resolve_call
-def resolve_import_folder_to_media_pool(folder_path: str,
-                                         target_bin: str = "") -> str:
+def resolve_import_folder_to_media_pool(folder_path: str, target_bin: str = "") -> str:
     """Recursively import an entire folder into the media pool.
 
     Preserves subfolder structure as bins.
@@ -188,5 +184,4 @@ def resolve_create_empty_timeline(timeline_name: str) -> str:
     """
     _, _, mp = _boilerplate()
     tl = mp.CreateEmptyTimeline(timeline_name)
-    return f"Created empty timeline '{timeline_name}'." if tl \
-        else f"Failed — name may already exist."
+    return f"Created empty timeline '{timeline_name}'." if tl else "Failed — name may already exist."

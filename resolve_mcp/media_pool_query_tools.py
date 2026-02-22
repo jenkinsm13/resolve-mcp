@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from .config import mcp
-from .resolve import _boilerplate, _find_bin, _collect_clips_recursive
+from .resolve import _boilerplate, _collect_clips_recursive, _find_bin
 
 
 def _resolve_clip(media_pool, clip_name: str):
@@ -46,7 +46,11 @@ def resolve_search_clips(query: str, search_in: str = "") -> str:
             if len(matches) >= 50:
                 break
 
-    return f"{len(matches)} match(es):\n" + "\n".join(f"  • {m}" for m in matches) if matches else f"No clips matching '{query}' found."
+    return (
+        f"{len(matches)} match(es):\n" + "\n".join(f"  • {m}" for m in matches)
+        if matches
+        else f"No clips matching '{query}' found."
+    )
 
 
 @mcp.tool
@@ -59,8 +63,12 @@ def resolve_get_clip_info(clip_name: str) -> str:
     clip = _resolve_clip(media_pool, clip_name)
     if not clip:
         return f"Clip '{clip_name}' not found in media pool."
-    return json.dumps({
-        "name": clip.GetName(),
-        "properties": clip.GetClipProperty() or {},
-        "metadata": clip.GetMetadata() or {},
-    }, indent=2, default=str)
+    return json.dumps(
+        {
+            "name": clip.GetName(),
+            "properties": clip.GetClipProperty() or {},
+            "metadata": clip.GetMetadata() or {},
+        },
+        indent=2,
+        default=str,
+    )

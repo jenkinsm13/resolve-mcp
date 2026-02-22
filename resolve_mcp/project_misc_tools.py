@@ -3,7 +3,7 @@
 import json
 
 from .config import mcp
-from .resolve import get_resolve, _boilerplate
+from .resolve import _boilerplate, get_resolve
 
 
 @mcp.tool

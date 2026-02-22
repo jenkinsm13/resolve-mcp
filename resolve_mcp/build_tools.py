@@ -5,14 +5,14 @@ Build timeline MCP tools: build_timeline and build_status.
 import json
 import threading
 from pathlib import Path
-from typing import Optional
 
+from .build_worker import (
+    _active_build_workers,
+    _build_worker,
+    _read_build_progress,
+)
 from .config import log, mcp
 from .media import load_sidecars
-from .build_worker import (
-    _build_worker, _active_build_workers,
-    _write_build_progress, _read_build_progress,
-)
 
 
 @mcp.tool
@@ -42,7 +42,7 @@ def build_timeline(folder_path: str, instruction: str) -> str:
             return f"Build already running: {progress.get('status', '?')} — {progress.get('detail', '?')}"
         return "Build already running."
 
-    cached_plan: Optional[dict] = None
+    cached_plan: dict | None = None
     edl_files = sorted(f for f in root.glob("*.edl.json") if not f.name.startswith("."))
     if edl_files:
         try:

@@ -6,13 +6,14 @@ Fusion clips, sidecar updates, node color reset, and Fairlight presets.
 """
 
 import base64
+
 from .config import mcp
 from .resolve import _boilerplate, get_resolve
-
 
 # ---------------------------------------------------------------------------
 # Timecode tools (Timeline)
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 def resolve_get_current_timecode() -> str:
@@ -52,6 +53,7 @@ def resolve_set_current_timecode(timecode: str) -> str:
 # Current video item
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 def resolve_get_current_video_item() -> str:
     """Get the current video timeline item (the clip under the playhead).
@@ -79,9 +81,9 @@ def resolve_get_current_video_item() -> str:
 # Linked items and track info (TimelineItem)
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
-def resolve_get_linked_items(track_type: str, track_index: int,
-                              item_index: int) -> str:
+def resolve_get_linked_items(track_type: str, track_index: int, item_index: int) -> str:
     """Get all timeline items linked to a specific clip.
 
     *track_type*: 'video' or 'audio'.
@@ -115,8 +117,7 @@ def resolve_get_linked_items(track_type: str, track_index: int,
 
 
 @mcp.tool
-def resolve_get_track_type_and_index(track_type: str, track_index: int,
-                                       item_index: int) -> str:
+def resolve_get_track_type_and_index(track_type: str, track_index: int, item_index: int) -> str:
     """Get the track type and index for a timeline item.
 
     Returns the track type ('video', 'audio', 'subtitle') and 1-based index.
@@ -162,6 +163,7 @@ def resolve_get_track_sub_type(track_type: str, track_index: int) -> str:
 # Thumbnail
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 def resolve_get_current_thumbnail(save_path: str = "") -> str:
     """Get thumbnail image data for the current clip on the Color page.
@@ -202,10 +204,11 @@ def resolve_get_current_thumbnail(save_path: str = "") -> str:
 # LUT Export (TimelineItem)
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
-def resolve_export_lut(export_path: str, lut_size: str = "33pt",
-                         track_type: str = "video", track_index: int = 1,
-                         item_index: int = 0) -> str:
+def resolve_export_lut(
+    export_path: str, lut_size: str = "33pt", track_type: str = "video", track_index: int = 1, item_index: int = 0
+) -> str:
     """Export a LUT from a timeline clip's grade.
 
     *export_path*: absolute path for the LUT file (.cube or .vlt).
@@ -253,9 +256,9 @@ def resolve_export_lut(export_path: str, lut_size: str = "33pt",
 # Fusion Clip creation
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
-def resolve_create_fusion_clip(track_type: str, track_index: int,
-                                item_indices: str) -> str:
+def resolve_create_fusion_clip(track_type: str, track_index: int, item_indices: str) -> str:
     """Create a Fusion clip from timeline items.
 
     *item_indices*: comma-separated 1-based indices of clips to merge.
@@ -284,9 +287,9 @@ def resolve_create_fusion_clip(track_type: str, track_index: int,
 # Sidecar update (BRAW / R3D)
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
-def resolve_update_sidecar(track_type: str, track_index: int,
-                             item_index: int) -> str:
+def resolve_update_sidecar(track_type: str, track_index: int, item_index: int) -> str:
     """Update sidecar file for a BRAW or R3D clip.
 
     Writes current decode settings to the .sidecar (BRAW) or .RMD (R3D) file.
@@ -314,6 +317,7 @@ def resolve_update_sidecar(track_type: str, track_index: int,
 # Node color reset
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 def resolve_reset_all_node_colors() -> str:
     """Reset node colors for all nodes in the current clip's active grade version.
@@ -338,6 +342,7 @@ def resolve_reset_all_node_colors() -> str:
 # ---------------------------------------------------------------------------
 # ARRI CDL + LUT
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 def resolve_apply_arri_cdl_lut() -> str:
@@ -369,6 +374,7 @@ def resolve_apply_arri_cdl_lut() -> str:
 # Fairlight presets
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 def resolve_get_fairlight_presets() -> str:
     """List available Fairlight presets.
@@ -386,7 +392,7 @@ def resolve_get_fairlight_presets() -> str:
 
     if isinstance(presets, dict):
         lines = [f"{len(presets)} Fairlight preset(s):"]
-        for name, info in presets.items():
+        for name, _info in presets.items():
             lines.append(f"  • {name}")
         return "\n".join(lines)
     elif isinstance(presets, list):
@@ -415,9 +421,9 @@ def resolve_apply_fairlight_preset(preset_name: str) -> str:
 # Third-party metadata (MediaPoolItem)
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
-def resolve_get_third_party_metadata(clip_name: str,
-                                       metadata_key: str = "") -> str:
+def resolve_get_third_party_metadata(clip_name: str, metadata_key: str = "") -> str:
     """Get third-party metadata for a media pool clip.
 
     *clip_name*: name of the clip.
@@ -445,9 +451,7 @@ def resolve_get_third_party_metadata(clip_name: str,
 
 
 @mcp.tool
-def resolve_set_third_party_metadata(clip_name: str,
-                                       metadata_key: str,
-                                       metadata_value: str) -> str:
+def resolve_set_third_party_metadata(clip_name: str, metadata_key: str, metadata_value: str) -> str:
     """Set third-party metadata on a media pool clip.
 
     *clip_name*: name of the clip.
@@ -468,6 +472,7 @@ def resolve_set_third_party_metadata(clip_name: str,
 # ---------------------------------------------------------------------------
 # MediaPool extras
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 def resolve_get_selected_clips() -> str:
@@ -538,8 +543,9 @@ def resolve_reveal_in_storage(path: str) -> str:
 
 
 @mcp.tool
-def resolve_load_burn_in_preset(preset_name: str, track_type: str = "video",
-                                  track_index: int = 1, item_index: int = 0) -> str:
+def resolve_load_burn_in_preset(
+    preset_name: str, track_type: str = "video", track_index: int = 1, item_index: int = 0
+) -> str:
     """Load a data burn-in preset for a timeline clip.
 
     *preset_name*: name of the burn-in preset.
@@ -572,12 +578,13 @@ def resolve_load_burn_in_preset(preset_name: str, track_type: str = "video",
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _find_clip(folder, name):
     """Recursively search for a clip by name."""
-    for clip in (folder.GetClipList() or []):
+    for clip in folder.GetClipList() or []:
         if clip.GetName() == name:
             return clip
-    for sub in (folder.GetSubFolderList() or []):
+    for sub in folder.GetSubFolderList() or []:
         found = _find_clip(sub, name)
         if found:
             return found
@@ -588,7 +595,7 @@ def _find_folder(folder, name):
     """Recursively find a folder by name."""
     if folder.GetName() == name:
         return folder
-    for sub in (folder.GetSubFolderList() or []):
+    for sub in folder.GetSubFolderList() or []:
         found = _find_folder(sub, name)
         if found:
             return found

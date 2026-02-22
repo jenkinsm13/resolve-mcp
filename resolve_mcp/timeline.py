@@ -4,15 +4,14 @@ OTIO timeline construction, FCP7 XML rendering, and media upload for editing pas
 
 import time
 from pathlib import Path
-from typing import Optional
 
 import opentimelineio as otio
 from opentimelineio.opentime import RationalTime, TimeRange
 
-from .config import MODEL, client, log
-from .retry import retry_gemini
-from .ffprobe import ffprobe_duration, ffprobe_start_tc, ffprobe_audio_info, tc_to_frames
+from .config import client, log
+from .ffprobe import ffprobe_audio_info, ffprobe_duration, ffprobe_start_tc, tc_to_frames
 from .media import find_proxy
+from .retry import retry_gemini
 
 
 def upload_media_for_editing(sidecars: list[dict]) -> list:
@@ -62,8 +61,8 @@ def upload_media_for_editing(sidecars: list[dict]) -> list:
 def build_otio_timeline(
     edit_plan: dict,
     default_fps: float = 24.0,
-    tc_offsets: Optional[dict[str, int]] = None,
-    clip_durations: Optional[dict[str, float]] = None,
+    tc_offsets: dict[str, int] | None = None,
+    clip_durations: dict[str, float] | None = None,
 ) -> otio.schema.Timeline:
     """Convert the Gemini EDL JSON into an OTIO Timeline with V1 + V2 tracks.
 
@@ -181,10 +180,7 @@ def render_xml(root: Path, edit_plan: dict, sidecars: list[dict]) -> tuple[Path,
     Returns (xml_path, tc_debug_lines).  Pure local operation — no Gemini.
     """
     # Timeline fps = highest fps found across video sidecars.
-    video_fps_values = [
-        sc.get("fps", 0) for sc in sidecars
-        if sc.get("media_type") != "audio" and sc.get("fps")
-    ]
+    video_fps_values = [sc.get("fps", 0) for sc in sidecars if sc.get("media_type") != "audio" and sc.get("fps")]
     timeline_fps = max(video_fps_values) if video_fps_values else 24.0
 
     # Probe each source file with ffprobe for start timecode and duration.
@@ -213,8 +209,7 @@ def render_xml(root: Path, edit_plan: dict, sidecars: list[dict]) -> tuple[Path,
         else:
             tc_debug.append(f"{media_path.name}: file not found")
 
-    log.info("TC offsets: %d/%d, durations: %d/%d",
-             len(tc_offsets), len(sidecars), len(clip_durations), len(sidecars))
+    log.info("TC offsets: %d/%d, durations: %d/%d", len(tc_offsets), len(sidecars), len(clip_durations), len(sidecars))
 
     timeline = build_otio_timeline(edit_plan, timeline_fps, tc_offsets, clip_durations)
     tl_name = edit_plan.get("timeline_name", "AI_Edit")
@@ -222,6 +217,7 @@ def render_xml(root: Path, edit_plan: dict, sidecars: list[dict]) -> tuple[Path,
     safe_name = tl_name.replace(":", " -").replace("/", "-").replace("\\", "-")
     # Append short timestamp to avoid overwriting previous exports.
     import time as _time
+
     stamp = _time.strftime("%m%d-%H%M")
     xml_path = root / f"{safe_name}_{stamp}.xml"
     otio.adapters.write_to_file(timeline, str(xml_path), adapter_name="fcp_xml")

@@ -32,6 +32,7 @@ def _graph(project):
 # Node creation & labelling
 # ---------------------------------------------------------------------------
 
+
 @mcp.tool
 @safe_resolve_call
 def resolve_node_set_label(node_index: int, label: str) -> str:
@@ -122,6 +123,7 @@ def resolve_node_add_layer(ref_node_index: int) -> str:
 # ---------------------------------------------------------------------------
 # Node inspection
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool
 @safe_resolve_call
@@ -217,7 +219,7 @@ def resolve_node_overview() -> str:
         enabled = ng.GetNodeEnabled(i)
         lut = ng.GetLUT(i) or "none"
         tools = ng.GetToolsInNode(i)
-        tool_ct = len(tools) if isinstance(tools, (dict, list)) else 0
+        tool_ct = len(tools) if isinstance(tools, dict | list) else 0
         state = "ON" if enabled else "OFF"
         lines.append(f"  {i}. [{state}] {label} | LUT: {lut} | {tool_ct} tool(s)")
     return "\n".join(lines)
