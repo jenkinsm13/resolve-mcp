@@ -22,7 +22,7 @@ from . import (
     clip_metadata_tools,  # noqa: F401  — clip markers/flags/proxy/transcription (18 tools)
     color_tools,  # noqa: F401  — color grading (12 tools)
     dolby_stereo_tools,  # noqa: F401  — Dolby Vision & 3D stereo (4 tools)
-    edit_tools,  # noqa: F401  — timeline item editing (12 tools)
+    edit_tools,  # noqa: F401  — timeline item editing (14 tools)
     fairlight_tools,  # noqa: F401  — Fairlight audio tools (4 tools)
     folder_tools,  # noqa: F401  — bin transcription/export/IDs (4 tools)
     fusion_node_tools,  # noqa: F401  — Fusion node graph manipulation (14 tools)

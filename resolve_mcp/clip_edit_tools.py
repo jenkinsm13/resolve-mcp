@@ -1,4 +1,4 @@
-"""Clip editing tools: set properties, enable/disable, color, delete, link, compound, stabilize, append, insert, swap, fit-to-fill."""
+"""Clip editing tools: set properties, enable/disable, color, delete, link, compound, stabilize, append, insert, swap."""
 
 import json
 from pathlib import Path
@@ -6,7 +6,6 @@ from pathlib import Path
 from .clip_query_tools import _get_item
 from .config import mcp
 from .resolve import _boilerplate, _collect_clips_recursive
-from .resolve_transforms import _apply_speed_ramp
 
 
 @mcp.tool
@@ -356,103 +355,4 @@ def resolve_swap_clips(track_type: str, track_index: int, item_index_a: int, ite
         f"Swapped properties between '{name_a}' (pos {item_index_a}) "
         f"and '{name_b}' (pos {item_index_b}). "
         f"{swapped} properties exchanged (fallback: {reason})."
-    )
-
-
-# ---------------------------------------------------------------------------
-# Fit to Fill
-# ---------------------------------------------------------------------------
-
-
-@mcp.tool
-def resolve_fit_to_fill(
-    clip_name: str,
-    target_duration_seconds: float,
-    start_frame: int = -1,
-    end_frame: int = -1,
-    track_type: str = "video",
-    track_index: int = 1,
-    retime_process: str = "OpticalFlow",
-) -> str:
-    """Append a clip and speed-ramp it to exactly fill a target duration (Fit to Fill).
-
-    The clip is appended to the timeline, then a Fusion TimeStretcher is applied
-    to uniformly adjust its speed so the output matches *target_duration_seconds*.
-
-    *clip_name*: filename or stem in the media pool.
-    *target_duration_seconds*: desired on-timeline duration in seconds.
-    *start_frame*/*end_frame*: optional source sub-clip range (-1 = full clip).
-    *track_type*: 'video' or 'audio' (default 'video').
-    *track_index*: 1-based track number (default 1).
-    *retime_process*: interpolation mode — 'OpticalFlow', 'FrameBlend', or
-        'NearestFrame' (default OpticalFlow).
-    """
-    _, project, mp = _boilerplate()
-    tl = project.GetCurrentTimeline()
-    if not tl:
-        return "No active timeline."
-
-    try:
-        fps = float(tl.GetSetting("timelineFrameRate") or 24)
-    except (ValueError, TypeError):
-        fps = 24.0
-
-    # ── Find the clip in the media pool ─────────────────────────────
-    pool = _collect_clips_recursive(mp.GetRootFolder())
-    clip = pool.get(clip_name) or pool.get(Path(clip_name).stem)
-    if not clip:
-        return f"Clip '{clip_name}' not found in media pool."
-
-    # ── Build clipInfo with optional sub-clip range ─────────────────
-    clip_info: dict = {
-        "mediaPoolItem": clip,
-        "mediaType": 1 if track_type.lower() == "video" else 2,
-        "trackIndex": int(track_index),
-    }
-    if start_frame >= 0 and end_frame >= 0:
-        clip_info["startFrame"] = int(start_frame)
-        clip_info["endFrame"] = int(end_frame)
-
-    # ── Append the clip ─────────────────────────────────────────────
-    result = mp.AppendToTimeline([clip_info])
-    if not result:
-        return f"Failed to append '{clip_name}' to timeline."
-
-    # ── Locate the new timeline item (last item on the track) ───────
-    items = tl.GetItemListInTrack(track_type.lower(), int(track_index))
-    if not items:
-        return "Clip appended but could not locate it on the track."
-    new_item = items[-1]
-
-    # ── Calculate speed ratio ───────────────────────────────────────
-    src_dur = new_item.GetDuration()
-    target_frames = round(target_duration_seconds * fps)
-    if target_frames <= 0:
-        return "Target duration must be positive."
-    if src_dur <= 0:
-        return "Source clip has zero duration."
-
-    speed_ratio = src_dur / target_frames  # >1 = speed up, <1 = slow down
-    speed_pct = speed_ratio * 100
-
-    # ── Apply uniform speed via Fusion TimeStretcher ────────────────
-    ramp_points = [
-        {"t_sec": 0.0, "speed": speed_ratio},
-        {"t_sec": target_duration_seconds, "speed": speed_ratio},
-    ]
-    ok = _apply_speed_ramp(new_item, ramp_points, fps)
-
-    # Set retime interpolation mode.
-    new_item.SetProperty("RetimeProcess", retime_process)
-
-    clip_display = clip.GetName() if hasattr(clip, "GetName") else clip_name
-    if ok:
-        return (
-            f"Fit-to-fill: '{clip_display}' → {target_duration_seconds:.2f}s "
-            f"at {speed_pct:.1f}% speed ({retime_process}). "
-            f"Source: {src_dur} frames, target: {target_frames} frames."
-        )
-    return (
-        f"Appended '{clip_display}' but speed ramp failed. "
-        f"Clip is at native speed. Manually set speed to {speed_pct:.1f}%."
     )
