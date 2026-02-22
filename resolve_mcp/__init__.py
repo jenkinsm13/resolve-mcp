@@ -1,6 +1,6 @@
 """
 resolve_mcp — MCP server for DaVinci Resolve scripting API.
-298 tools covering the full Resolve API (v20.3) plus AI-enhanced editing tools.
+302 tools covering the full Resolve API (v20.3) plus AI-enhanced editing tools.
 """
 
 from .config import mcp  # noqa: F401 — re-export for entry points
@@ -20,6 +20,7 @@ from . import (
     audio_mapping_tools,  # noqa: F401  — audio channel mapping inspection (2 tools)
     cache_tools,  # noqa: F401  — color/Fusion/node cache control (6 tools)
     clip_metadata_tools,  # noqa: F401  — clip markers/flags/proxy/transcription (18 tools)
+    color_ai_tools,  # noqa: F401  — AI color grading, B-roll, consistency (4 tools)
     color_tools,  # noqa: F401  — color grading (12 tools)
     dolby_stereo_tools,  # noqa: F401  — Dolby Vision & 3D stereo (4 tools)
     edit_tools,  # noqa: F401  — timeline item editing (14 tools)
