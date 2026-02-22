@@ -11,6 +11,15 @@
         ]
       },
       {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'pyproject\\.toml' && echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '\"version\"'; then echo 'BLOCKED: Do not edit the version field in pyproject.toml directly — use /bump-publish' >&2; exit 1; fi"
+          }
+        ]
+      },
+      {
         "matcher": "mcp__resolve-mcp__resolve_delete_clips|mcp__resolve-mcp__resolve_delete_timelines|mcp__resolve-mcp__resolve_delete_clips_from_timeline|mcp__resolve-mcp__resolve_reset_grades|mcp__resolve-mcp__resolve_delete_markers|mcp__resolve-mcp__resolve_delete_track|mcp__resolve-mcp__resolve_delete_bins|mcp__resolve-mcp__resolve_delete_stills|mcp__resolve-mcp__resolve_delete_render_job|mcp__resolve-mcp__resolve_delete_all_render_jobs|mcp__resolve-mcp__resolve_delete_project",
         "hooks": [
           {
@@ -21,6 +30,15 @@
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -oE '\"file_path\":\\s*\"[^\"]+\\.py\"' | head -1 | sed 's/.*\"\\([^\"]*\\.py\\)\"/\\1/'); if [ -n \"$FILE\" ] && command -v ruff >/dev/null 2>&1; then ruff format --quiet \"$FILE\" 2>/dev/null; ruff check --fix --quiet \"$FILE\" 2>&1 | tail -5; fi"
+          }
+        ]
+      },
       {
         "matcher": "Edit|Write",
         "hooks": [

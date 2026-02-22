@@ -19,6 +19,17 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -oE '\"file_path\":\\s*\"[^\"]+\\.py\"' | head -1 | sed 's/.*\"\\([^\"]*\\.py\\)\"/\\1/'); if [ -n \"$FILE\" ] && command -v ruff >/dev/null 2>&1; then ruff format --quiet \"$FILE\" 2>/dev/null; ruff check --fix --quiet \"$FILE\" 2>&1 | tail -5; fi"
+          }
+        ]
+      }
     ]
   }
 }

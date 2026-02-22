@@ -1,6 +1,6 @@
 # resolve-mcp
 
-MCP server exposing 215+ tools for the DaVinci Resolve scripting API (v20.3), plus 3 optional AI bridge tools powered by Google Gemini.
+MCP server exposing 285+ tools for the DaVinci Resolve scripting API (v20.3), plus AI bridge tools powered by Google Gemini.
 
 ## Architecture
 
@@ -28,9 +28,9 @@ MCP server exposing 215+ tools for the DaVinci Resolve scripting API (v20.3), pl
 
 ### Gemini (optional)
 - `GEMINI_API_KEY` is **optional** — `client = None` when not set
-- Only 3 AI bridge tools need Gemini: `resolve_analyze_timeline`, `resolve_add_markers`, `resolve_build_from_markers`
+- Only AI bridge tools need Gemini
 - AI tools must check `if client is None: return "Error: GEMINI_API_KEY not set..."` before doing anything
-- `from google.genai import types` is imported **inside** functions that need it (not at module level) to avoid import errors when Gemini is not installed
+- `from google.genai import types` is imported **inside** functions that need it (not at module level)
 
 ### Constants
 - `VIDEO_EXTS`, `AUDIO_EXTS`, `GEMINI_MAX_BYTES`, `SAFE_CODECS`, `GEMINI_MAX_LONG_EDGE` in `config.py`
@@ -58,16 +58,35 @@ MCP server exposing 215+ tools for the DaVinci Resolve scripting API (v20.3), pl
 | `item_marker_tools.py` | 11 | Timeline item markers & flags |
 | `item_version_tools.py` | 11 | Clip versions/color groups |
 | `fusion_tools.py` | 8 | Fusion comp management |
+| `fusion_node_tools.py` | 14 | Fusion node graph manipulation |
 | `gallery_tools.py` | 7 | Gallery albums & stills |
-| `node_tools.py` | 5 | Node graph |
+| `node_tools.py` | 9 | Node graph |
 | `layout_preset_tools.py` | 22 | Layouts/burn-in/render presets |
-| `dolby_stereo_tools.py` | 4 | Dolby Vision & stereo 3D |
+| `dolby_stereo_tools.py` | 4 | Dolby Vision & 3D stereo |
 | `folder_tools.py` | 4 | Bin transcription/export/IDs |
-| `resolve_ai_tools.py` | 3 | AI bridge tools (Gemini) |
+| `cache_tools.py` | 6 | Color/Fusion/node cache control |
+| `quick_export_tools.py` | 2 | Quick Export presets & render |
+| `keyframe_tools.py` | 2 | Keyframe mode get/set |
+| `take_tools.py` | 7 | Take selector management |
+| `magic_mask_tools.py` | 2 | AI magic mask create/regenerate |
+| `matte_tools.py` | 5 | Clip/timeline matte management |
+| `mark_tools.py` | 6 | Mark in/out on timelines & clips |
+| `audio_mapping_tools.py` | 2 | Audio channel mapping inspection |
+| `timeline_extras.py` | 17 | Timecodes, linked items, LUT export |
+| `resolve_tools.py` | 9 | AI bridge tools (Gemini) |
+
+## Dev Tooling
+
+- **Lint/Format**: `ruff check .` / `ruff format .` (config in `pyproject.toml`)
+- **Type check**: `pyright resolve_mcp/`
+- **Tests**: `pytest tests/ -v` (import + convention tests — no Resolve required)
+- **CI**: GitHub Actions runs lint, typecheck, and tests on push/PR
+- **Hooks**: PostToolUse auto-runs ruff + pyright on `.py` edits; PreToolUse blocks `.env` edits and direct version field changes
 
 ## Build & Publish
 
 ```bash
+# Use the /bump-publish skill, or manually:
 # Bump version in pyproject.toml, then:
 uv build && uv publish --token $PYPI_TOKEN
 git add -A && git commit -m "..." && git push origin main
