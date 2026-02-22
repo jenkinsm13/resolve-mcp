@@ -1,6 +1,6 @@
 [project]
 name = "resolve-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP server with 215+ tools for DaVinci Resolve scripting API (v20.3)"
 readme = "README.md"
 license = "MIT"
@@ -22,7 +22,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
-    "fastmcp[cli]>=3.0.0",
+    "fastmcp>=3.0.0",
     "google-genai>=1.64.0",
     "opentimelineio>=0.18.1",
     "otio-fcp-adapter>=1.0.0",
