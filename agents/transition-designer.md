@@ -36,6 +36,8 @@ tools:
   - mcp__resolve-mcp__resolve_fusion_set_comp_time
   - mcp__resolve-mcp__resolve_fusion_get_comp_time
   - mcp__resolve-mcp__resolve_fusion_render_comp
+  - mcp__resolve-assistant__resolve_analyze_footage
+  - mcp__resolve-assistant__resolve_enhance_timeline
 ---
 
 # Transition Designer Agent
@@ -256,3 +258,28 @@ rather than just fading.
 - **The cut point is sacred** — the transition should feel intentional, not cover up a bad edit
 - For music-driven content, time the transition to hit on the beat
 - When the user asks for a "smooth transition," they usually mean a dissolve or soft wipe, not a glitch
+
+## Gemini QA Review
+
+After building a transition, use Gemini to review the rendered output:
+
+```
+QA Loop:
+  1. Render the comp:
+     resolve_fusion_render_comp()
+
+  2. Analyze with Gemini:
+     resolve_analyze_footage(folder_path)
+     → Gemini evaluates:
+       - Flow: Does the transition feel natural between the two shots?
+       - Timing: Is it too fast (jarring) or too slow (dragging)?
+       - Artifacts: Any visible seams, pops, or glitches (unintentional ones)?
+       - Energy match: Does the transition energy match the content energy?
+
+  3. Report findings and adjust timing/parameters
+
+  4. Use resolve_enhance_timeline() to check how the transition
+     affects the overall pacing of the edit
+```
+
+QA is especially important for transitions — a bad transition is worse than a straight cut. Always verify the first instance before applying to the rest of the edit.

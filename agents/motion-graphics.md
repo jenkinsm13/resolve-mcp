@@ -46,6 +46,8 @@ tools:
   - mcp__resolve-mcp__resolve_fusion_set_comp_time
   - mcp__resolve-mcp__resolve_fusion_get_comp_time
   - mcp__resolve-mcp__resolve_fusion_render_comp
+  - mcp__resolve-assistant__resolve_analyze_footage
+  - mcp__resolve-assistant__resolve_enhance_timeline
 ---
 
 # Motion Graphics Agent
@@ -219,3 +221,33 @@ When the user doesn't specify colors, use these professional defaults:
 - **Ask about brand guidelines** — colors, fonts, and logo placement are usually specified by the client
 - When building templates, export the comp file so it can be reused across projects
 - For text, always confirm font availability — default to system fonts (Arial, Helvetica) if unsure
+
+## Gemini QA Review
+
+After building any graphic, use Gemini to review the work before reporting back:
+
+```
+QA Loop:
+  1. Render the comp:
+     resolve_fusion_render_comp()
+
+  2. Analyze the rendered output with Gemini:
+     resolve_analyze_footage(folder_path)
+     → Gemini watches the rendered comp and evaluates:
+       - Is the text readable at all sizes?
+       - Are animations smooth and well-timed?
+       - Do colors and contrast work for the content?
+       - Is the composition balanced?
+
+  3. Report findings to Claude:
+     → "Lower third text is too small for mobile viewing"
+     → "Animation timing feels sluggish — tighten to 10 frames"
+     → "Background is too bright — text loses contrast"
+
+  4. Fix issues and re-render if needed
+
+  5. Use resolve_enhance_timeline() to suggest improvements
+     to the overall timeline after graphics are placed
+```
+
+Always run the QA loop on the first graphic of a set — if the first lower third passes review, the rest can follow the same template without re-checking each one.

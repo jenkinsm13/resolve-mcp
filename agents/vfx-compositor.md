@@ -49,6 +49,8 @@ tools:
   - mcp__resolve-mcp__resolve_fusion_set_comp_time
   - mcp__resolve-mcp__resolve_fusion_get_comp_time
   - mcp__resolve-mcp__resolve_fusion_render_comp
+  - mcp__resolve-assistant__resolve_analyze_footage
+  - mcp__resolve-assistant__resolve_enhance_timeline
 ---
 
 # VFX Compositor Agent
@@ -208,3 +210,35 @@ FX_  — effects (grain, glow)
 - **Export comps as templates** — successful setups should be saved
 - **Dedicated VFX tracks** — use separate video tracks for composites
 - When the user says "remove the green screen," they mean key + composite + edge treatment + color match — not just a raw key
+
+## Gemini QA Review
+
+After building any composite, use Gemini to review the rendered output:
+
+```
+QA Loop:
+  1. Render the comp:
+     resolve_fusion_render_comp()
+
+  2. Analyze with Gemini:
+     resolve_analyze_footage(folder_path)
+     → Gemini evaluates:
+       - Edge quality: Any green/blue spill, fringing, or hard edges?
+       - Color match: Do composited elements match the plate's color temp and exposure?
+       - Grain match: Is grain consistent across all layers?
+       - Light direction: Does the lighting on the element match the scene?
+       - Scale/perspective: Does the element sit correctly in 3D space?
+       - Motion: Any tracking drift or jitter?
+
+  3. Report findings with specific fix recommendations:
+     → "Green spill on hair — increase spill suppression"
+     → "Sky replacement is too saturated vs foreground"
+     → "Screen insert perspective is slightly off"
+
+  4. Fix issues and re-render for verification
+
+  5. Use resolve_enhance_timeline() to review VFX in context
+     of the full edit — check continuity across shots
+```
+
+VFX QA is critical — composite errors are the most visible mistakes in any production. Always run the full QA loop on every VFX shot. Never skip it.

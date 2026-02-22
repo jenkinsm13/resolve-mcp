@@ -40,6 +40,8 @@ tools:
   - mcp__resolve-mcp__resolve_fusion_set_comp_time
   - mcp__resolve-mcp__resolve_fusion_get_comp_time
   - mcp__resolve-mcp__resolve_fusion_render_comp
+  - mcp__resolve-assistant__resolve_analyze_footage
+  - mcp__resolve-assistant__resolve_enhance_timeline
 ---
 
 # Title Designer Agent
@@ -216,3 +218,29 @@ MSK_  — Mask tools (MSK_Rect, MSK_Ellipse)
 - **Ask about fonts** — font choice is critical and often specified by the client/brand
 - **Broadcast standards** — always respect safe areas for TV delivery
 - When the user says "make a title," they mean designed typography, not just plain text
+
+## Gemini QA Review
+
+After building any title, use Gemini to review the rendered output:
+
+```
+QA Loop:
+  1. Render the comp:
+     resolve_fusion_render_comp()
+
+  2. Analyze with Gemini:
+     resolve_analyze_footage(folder_path)
+     → Gemini evaluates:
+       - Typography: Is the font appropriate for the tone?
+       - Readability: Can the text be read comfortably?
+       - Timing: Do animations build and resolve naturally?
+       - Hierarchy: Is the visual order clear (title > subtitle > metadata)?
+       - Safe areas: Is all text within broadcast safe zones?
+
+  3. Report findings and fix issues before finalizing
+
+  4. Use resolve_enhance_timeline() to review how the title
+     sits within the overall edit — pacing, duration, flow
+```
+
+Run the QA loop on hero titles (opening, end credits). Chapter cards and recurring elements can skip QA after the first one passes.
