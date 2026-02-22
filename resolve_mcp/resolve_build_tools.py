@@ -2,19 +2,21 @@
 Resolve build tools: Gemini edit → AppendToTimeline pipeline.
 """
 
+import contextlib
 import json
 import threading
 from pathlib import Path
 
-from .config import MODEL, client, log, mcp
-from .retry import retry_gemini
+from .build import _active_build_workers
+from .config import MODEL, client, mcp
+from .ingest import _ingest_worker
+from .media import load_sidecars
+from .outputs import save_directors_notes, save_music_brief, save_voiceover_script
+from .prompts import EDIT_PROMPT_TEMPLATE, MUSIC_BRIEF_ADDENDUM
 from .resolve import _boilerplate, _find_bin
 from .resolve_build import build_timeline_direct
 from .resolve_ingest_tools import _dirs_from_bin
-from .ingest import _ingest_worker, _active_workers
-from .media import load_sidecars
-from .outputs import save_directors_notes, save_voiceover_script, save_music_brief
-from .prompts import EDIT_PROMPT_TEMPLATE, MUSIC_BRIEF_ADDENDUM
+from .retry import retry_gemini
 from .timeline import upload_media_for_editing
 
 _RESOLVE_BUILD_PROGRESS = ".resolve_build_progress.json"
@@ -23,6 +25,7 @@ _RESOLVE_BUILD_PROGRESS = ".resolve_build_progress.json"
 def _resolve_build_worker(root: Path, sidecars: list, instruction: str) -> None:
     """Background thread: upload → Gemini edit plan → AppendToTimeline."""
     from google.genai import types
+
     progress_file = root / _RESOLVE_BUILD_PROGRESS
 
     def _write(data):
@@ -79,17 +82,20 @@ def _resolve_build_worker(root: Path, sidecars: list, instruction: str) -> None:
         _write({"status": "building", "detail": f"Calling AppendToTimeline with {len(cuts)} cuts…", "error": None})
 
         from .resolve import get_resolve
+
         resolve_obj = get_resolve()
         if not resolve_obj:
             _write({"status": "error", "detail": "Resolve not running at build time.", "error": None})
             return
 
         success, msg = build_timeline_direct(edit_plan, resolve_obj)
-        _write({
-            "status": "complete" if success else "error",
-            "detail": msg,
-            "error": None,
-        })
+        _write(
+            {
+                "status": "complete" if success else "error",
+                "detail": msg,
+                "error": None,
+            }
+        )
 
     except Exception as exc:
         _write({"status": "error", "detail": "Unexpected error.", "error": str(exc)})
@@ -115,12 +121,12 @@ def resolve_build_timeline(bin_name_or_folder: str, instruction: str) -> str:
             return "No sidecar JSONs found in folder. Run ingest_footage first."
         key = str(root)
         progress_file = root / _RESOLVE_BUILD_PROGRESS
-        if key in _active_workers and _active_workers[key].is_alive():
+        if key in _active_build_workers and _active_build_workers[key].is_alive():
             prog = json.loads(progress_file.read_text()) if progress_file.exists() else {}
-            return f"Build already running: {prog.get('status','?')} — {prog.get('detail','?')}"
+            return f"Build already running: {prog.get('status', '?')} — {prog.get('detail', '?')}"
         t = threading.Thread(target=_resolve_build_worker, args=(root, sidecars, instruction), daemon=True)
         t.start()
-        _active_workers[key] = t
+        _active_build_workers[key] = t
         return (
             f"Build started for folder '{root}' ({len(sidecars)} sidecars). "
             f"Use resolve_build_status('{bin_name_or_folder}') to monitor."
@@ -154,20 +160,17 @@ def resolve_build_timeline(bin_name_or_folder: str, instruction: str) -> str:
     root = sorted(dirs)[0]
     sidecars = load_sidecars(root)
     if not sidecars:
-        return (
-            f"No sidecars found in '{root}'. "
-            f"Run resolve_ingest_bin('{bin_name_or_folder}') first."
-        )
+        return f"No sidecars found in '{root}'. Run resolve_ingest_bin('{bin_name_or_folder}') first."
 
     key = str(root)
     progress_file = root / _RESOLVE_BUILD_PROGRESS
-    if key in _active_workers and _active_workers[key].is_alive():
+    if key in _active_build_workers and _active_build_workers[key].is_alive():
         prog = json.loads(progress_file.read_text()) if progress_file.exists() else {}
-        return f"Build already running: {prog.get('status','?')} — {prog.get('detail','?')}"
+        return f"Build already running: {prog.get('status', '?')} — {prog.get('detail', '?')}"
 
     t = threading.Thread(target=_resolve_build_worker, args=(root, sidecars, instruction), daemon=True)
     t.start()
-    _active_workers[key] = t
+    _active_build_workers[key] = t
     return (
         f"Build started for bin '{bin_name_or_folder}' ({len(sidecars)} sidecars in '{root}'). "
         f"Use resolve_build_status('{bin_name_or_folder}') to monitor."
@@ -188,7 +191,7 @@ def resolve_build_status(bin_name_or_folder: str) -> str:
             resolve, project, media_pool = _boilerplate()
             target = _find_bin(media_pool.GetRootFolder(), bin_name_or_folder)
             if target:
-                for clip in (target.GetClipList() or []):
+                for clip in target.GetClipList() or []:
                     try:
                         fp = clip.GetClipProperty("File Path")
                         if fp:
@@ -211,7 +214,7 @@ def resolve_build_status(bin_name_or_folder: str) -> str:
 
     status = prog.get("status", "unknown")
     detail = prog.get("detail", "")
-    error  = prog.get("error")
+    error = prog.get("error")
 
     if status == "complete":
         return f"Build complete: {detail}"
@@ -260,37 +263,45 @@ def resolve_edit_bin(bin_name: str, instruction: str) -> str:
 
     key = str(root)
     progress_file = root / _RESOLVE_BUILD_PROGRESS
-    if key in _active_workers and _active_workers[key].is_alive():
+    if key in _active_build_workers and _active_build_workers[key].is_alive():
         prog = {}
-        try:
+        with contextlib.suppress(Exception):
             prog = json.loads(progress_file.read_text())
-        except Exception:
-            pass
-        return f"Pipeline already running for '{bin_name}': {prog.get('status','?')} — {prog.get('detail','?')}"
+        return f"Pipeline already running for '{bin_name}': {prog.get('status', '?')} — {prog.get('detail', '?')}"
 
     def _pipeline():
-        from .media import list_pending_videos, list_pending_audio, load_sidecars as _load
+        from .media import list_pending_audio, list_pending_videos
+        from .media import load_sidecars as _load
+
         pending = list_pending_videos(root) + list_pending_audio(root)
         if pending:
-            progress_file.write_text(json.dumps({
-                "status": "ingesting",
-                "detail": f"Ingesting {len(pending)} clips from bin '{bin_name}'…",
-                "error": None,
-            }))
+            progress_file.write_text(
+                json.dumps(
+                    {
+                        "status": "ingesting",
+                        "detail": f"Ingesting {len(pending)} clips from bin '{bin_name}'…",
+                        "error": None,
+                    }
+                )
+            )
             _ingest_worker(root)
         sidecars = _load(root)
         if not sidecars:
-            progress_file.write_text(json.dumps({
-                "status": "error",
-                "detail": "No sidecars after ingest — check for errors.",
-                "error": None,
-            }))
+            progress_file.write_text(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "detail": "No sidecars after ingest — check for errors.",
+                        "error": None,
+                    }
+                )
+            )
             return
         _resolve_build_worker(root, sidecars, instruction)
 
     t = threading.Thread(target=_pipeline, daemon=True)
     t.start()
-    _active_workers[key] = t
+    _active_build_workers[key] = t
 
     return (
         f"Pipeline started for bin '{bin_name}' ({len(clips_list)} clips → '{root}').\n"
