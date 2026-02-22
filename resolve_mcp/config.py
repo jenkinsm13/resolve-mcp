@@ -32,8 +32,8 @@ if GEMINI_API_KEY:
 mcp = FastMCP(
     "resolve-mcp",
     instructions=(
-        "MCP server with 215+ tools for DaVinci Resolve scripting API (v20.3) "
-        "plus 3 AI-enhanced tools (analyze_timeline, add_markers, build_from_markers).\n\n"
+        "MCP server with 285 tools for DaVinci Resolve scripting API (v20.3) "
+        "plus AI-enhanced tools (analyze_timeline, add_markers, build_from_markers).\n\n"
         "PREREQUISITES: DaVinci Resolve must be running with scripting enabled "
         "(Preferences → System → General → External scripting using = Network). "
         "Set GEMINI_API_KEY in .env for AI bridge tools (optional).\n\n"

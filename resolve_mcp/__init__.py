@@ -1,6 +1,6 @@
 """
 resolve_mcp — MCP server for DaVinci Resolve scripting API.
-215+ tools covering the full Resolve API (v20.3) plus AI-enhanced editing tools.
+285 tools covering the full Resolve API (v20.3) plus AI-enhanced editing tools.
 """
 
 from .config import mcp  # noqa: F401 — re-export for entry points
@@ -36,6 +36,17 @@ from . import node_tools          # noqa: F401  — node graph (9 tools)
 from . import layout_preset_tools # noqa: F401  — layouts/burn-in/render presets (22 tools)
 from . import dolby_stereo_tools  # noqa: F401  — Dolby Vision & 3D stereo (4 tools)
 from . import folder_tools        # noqa: F401  — bin transcription/export/IDs (4 tools)
+
+# --- API gap coverage (v20.3 complete) ---
+from . import cache_tools         # noqa: F401  — color/Fusion/node cache control (6 tools)
+from . import quick_export_tools  # noqa: F401  — Quick Export presets & render (2 tools)
+from . import keyframe_tools      # noqa: F401  — keyframe mode get/set (2 tools)
+from . import take_tools          # noqa: F401  — take selector management (7 tools)
+from . import magic_mask_tools    # noqa: F401  — AI magic mask create/regenerate (2 tools)
+from . import matte_tools         # noqa: F401  — clip/timeline matte management (5 tools)
+from . import mark_tools          # noqa: F401  — mark in/out on timelines & clips (6 tools)
+from . import audio_mapping_tools # noqa: F401  — audio channel mapping inspection (2 tools)
+from . import timeline_extras     # noqa: F401  — timecodes, linked items, LUT export, etc. (17 tools)
 
 # --- AI bridge tools (require GEMINI_API_KEY) ---
 from . import resolve_tools       # noqa: F401  — AI-driven Resolve tools (9 tools)
