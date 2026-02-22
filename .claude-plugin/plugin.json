@@ -1,0 +1,11 @@
+{
+  "name": "resolve-mcp",
+  "description": "DaVinci Resolve editing skills — color grading, delivery, preflight QC, Dolby Vision, timeline management, and more. Pairs with the resolve-mcp MCP server (215+ tools).",
+  "version": "0.1.0",
+  "author": {
+    "name": "jenkinsm"
+  },
+  "repository": "https://github.com/jenkinsm/resolve-mcp",
+  "license": "MIT",
+  "keywords": ["davinci-resolve", "video-editing", "color-grading", "mcp", "post-production", "dolby-vision", "resolve"]
+}

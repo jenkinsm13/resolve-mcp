@@ -417,17 +417,63 @@ Once configured, just talk to your AI assistant naturally:
 
 ---
 
+## Claude Code Plugin — Skills, Agents & Hooks
+
+This repo is also a **Claude Code plugin** that installs 13 editor-focused skills, 3 specialized agents, and safety hooks directly into Claude Code.
+
+### Install the Plugin
+
+```bash
+claude plugin add github.com/jenkinsm13/resolve-mcp
+```
+
+This gives you slash commands for common editing workflows that pair with the 215+ MCP tools:
+
+### Skills (invoke with `/skill-name`)
+
+| Skill | Description |
+|-------|-------------|
+| `/color-assist` | AI color grading — exports sRGB frame, analyzes it visually, applies CDL adjustments |
+| `/match-reference` | Match a reference image — compare side-by-side, adjust CDL to match the look |
+| `/deliver` | One-command render with presets (H.265 4K, ProRes, YouTube, Instagram, TikTok) |
+| `/multi-deliver` | Batch render multiple deliverables from one timeline |
+| `/preflight` | Full pre-delivery QC — gaps, disabled clips, FPS mismatches, un-graded clips, markers |
+| `/dolby-vision` | Dolby Vision render pipeline with profile selection and analyzer |
+| `/review-cut` | Render review cut + AI editorial feedback via Gemini |
+| `/archive` | Export complete project archive (DRP + media manifest + timelines + markers) |
+| `/prep-timeline` | Create timeline with standard track layout (V1 A-Roll, V2 B-Roll, V3 GFX, etc.) |
+| `/organize` | Auto-organize media pool into bins by clip type |
+| `/markers-to-notes` | Export timeline markers as editorial notes markdown |
+| `/import-notes` | Parse timecoded client notes into color-coded markers |
+| `/timeline-diff` | Compare two timelines — report added, removed, trimmed, moved clips |
+
+### Agents
+
+| Agent | Description |
+|-------|-------------|
+| `color-analyst` | Structured color analysis with CDL recommendations (dispatched by `/color-assist`) |
+| `timeline-auditor` | Pre-delivery QC for gaps, disabled clips, FPS mismatches, markers |
+| `color-consistency-checker` | Post-grading QC for grade coverage, LUT consistency, CDL ranges |
+
+### Hooks
+
+- **`.env` protection** — blocks editing of `.env` files containing API keys
+- **Destructive operation warning** — warns before delete operations in Resolve (clips, timelines, grades, markers, bins, projects)
+
+> **Note:** The plugin installs skills/agents/hooks into Claude Code. The MCP server (215+ tools) still needs to be installed separately via `uvx resolve-mcp` or `pip install resolve-mcp`.
+
+---
+
 ## Architecture
 
 ```
 resolve-mcp
-├── resolve_mcp/
+├── resolve_mcp/               # Python package (installed via pip/uvx)
 │   ├── __init__.py            # Package init, registers all tool modules
 │   ├── __main__.py            # python -m resolve_mcp entry point
 │   ├── config.py              # FastMCP server + optional Gemini client
 │   ├── resolve.py             # DaVinci Resolve scripting API connection
 │   ├── errors.py              # Error handling + @safe_resolve_call decorator
-│   ├── constants.py           # Resolve API constants (colors, track types, etc.)
 │   ├── resources.py           # MCP resources (resolve://project, etc.)
 │   ├── project_tools.py       # Project management (10 tools)
 │   ├── media_pool_tools.py    # Media pool operations (11 tools)
@@ -440,6 +486,17 @@ resolve-mcp
 │   ├── fairlight_tools.py     # Fairlight audio (4 tools)
 │   ├── ...                    # 10+ more tool modules
 │   └── resolve_ai_tools.py    # AI bridge tools (3 tools)
+├── skills/                    # Claude Code plugin skills
+│   ├── color-assist/SKILL.md
+│   ├── deliver/SKILL.md
+│   ├── preflight/SKILL.md
+│   └── ...                    # 13 skills total
+├── agents/                    # Claude Code plugin agents
+│   ├── color-analyst.md
+│   ├── timeline-auditor.md
+│   └── color-consistency-checker.md
+├── hooks/hooks.json           # Claude Code plugin hooks
+├── .claude-plugin/plugin.json # Plugin manifest
 ├── pyproject.toml
 ├── .env.example
 └── README.md
