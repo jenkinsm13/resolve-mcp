@@ -1,11 +1,9 @@
 """
-AI-powered color grading, B-roll insertion, and grade consistency tools.
+Color grading preview, B-roll insertion, and grade consistency tools.
 
-Three Gemini-driven tools that extend the Resolve MCP server beyond editing:
-
-- ``resolve_auto_grade``: apply a creative look via AI-suggested CDL values
-- ``resolve_auto_broll``: auto-populate B-roll track from media pool footage
-- ``resolve_check_grade_consistency``: audit + fix color consistency across clips
+- ``resolve_grade_preview``: export one frame per clip for Claude to view and grade
+- ``resolve_auto_broll``: Gemini watches footage and auto-populates a B-roll track
+- ``resolve_check_grade_consistency``: Gemini QC — audit grade consistency after Claude grades
 """
 
 from __future__ import annotations
@@ -20,7 +18,7 @@ from pathlib import Path
 from .build_worker import _active_build_workers
 from .config import MODEL, client, log, mcp
 from .media import load_sidecars
-from .prompts_color import AUTO_BROLL_PROMPT, AUTO_GRADE_PROMPT, GRADE_CONSISTENCY_PROMPT
+from .prompts_color import AUTO_BROLL_PROMPT, GRADE_CONSISTENCY_PROMPT
 from .resolve import _boilerplate
 from .resolve_build import build_timeline_direct
 from .retry import retry_gemini
@@ -28,7 +26,7 @@ from .timeline import upload_media_for_editing
 
 _BROLL_PROGRESS_FILE = ".resolve_broll_progress.json"
 
-# Background results for sync/background hybrid (auto_grade, consistency).
+# Background results for sync/background hybrid (consistency checker).
 _color_results: dict[str, dict] = {}
 
 
@@ -161,30 +159,25 @@ def _build_image_parts(frames: list[dict], reference_path: str = "") -> list:
 
 
 # ---------------------------------------------------------------------------
-# Tool 1: AI Auto Grade
+# Tool 1: Grade Preview (Claude is the colorist, not Gemini)
 # ---------------------------------------------------------------------------
 
 
 @mcp.tool
-def resolve_auto_grade(style: str, reference_image_path: str = "") -> str:
-    """Apply an AI-suggested color grade to every clip on the current timeline.
+def resolve_grade_preview() -> str:
+    """Export one representative frame per clip on the current timeline for color grading.
 
-    Exports one frame per clip, sends them to Gemini with your creative direction,
-    and applies the returned CDL values on a new node (preserving existing grades).
+    Returns clip metadata and frame file paths so you (Claude) can inspect each
+    frame with the Read tool, decide on CDL values, and apply grades clip-by-clip.
 
-    *style*: creative direction — e.g. ``"warm cinematic"``, ``"cool desaturated noir"``,
-    ``"match the reference image"``, ``"teal and orange blockbuster"``.
+    Typical grading workflow after calling this tool:
 
-    *reference_image_path*: optional absolute path to a reference frame/image.
-    Gemini will match the grade to this reference.
+    1. Read each frame PNG to see the current look.
+    2. ``resolve_node_add_serial`` on the clip to preserve existing grades.
+    3. ``resolve_set_cdl`` with your chosen Slope / Offset / Power / Saturation.
 
-    Clips ≤ 15: runs synchronously.  Clips > 15: runs in background — re-call
-    to retrieve the result.
+    Frames are saved to a persistent temp directory and refreshed on each call.
     """
-    if client is None:
-        return "Error: GEMINI_API_KEY not set. AI grading requires Gemini."
-    from google.genai import types
-
     try:
         _, project, _ = _boilerplate()
     except ValueError as e:
@@ -195,105 +188,56 @@ def resolve_auto_grade(style: str, reference_image_path: str = "") -> str:
         return "Error: No active timeline in Resolve."
 
     tl_name = timeline.GetName()
-    result_key = f"grade:{tl_name}"
 
-    # Check for a previously launched background result.
-    if result_key in _color_results:
-        entry = _color_results[result_key]
-        if entry.get("result"):
-            result = entry["result"]
-            del _color_results[result_key]
-            return result
-        if entry.get("error"):
-            error = entry["error"]
-            del _color_results[result_key]
-            return f"Error during grading: {error}"
-        if entry.get("thread") and entry["thread"].is_alive():
-            return f"AI grading still running for '{tl_name}'…"
-        del _color_results[result_key]
+    fps = 24.0
+    with contextlib.suppress(Exception):
+        fps = float(timeline.GetSetting("timelineFrameRate"))
 
-    def _run_grade() -> str:
-        tmpdir = tempfile.mkdtemp(prefix="resolve_grade_")
-        try:
-            frames = _export_timeline_frames(project, timeline, tmpdir)
-            if not frames:
-                return "No frames exported — ensure video track 1 has clips."
+    # Persistent output directory — refreshed each call.
+    out_dir = Path(tempfile.gettempdir()) / "resolve_grade_preview"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for old in out_dir.glob("*.png"):
+        old.unlink(missing_ok=True)
 
-            clip_names = [f["clip_name"] for f in frames]
-            reference_section = ""
-            if reference_image_path and Path(reference_image_path).exists():
-                reference_section = (
-                    "A REFERENCE IMAGE is included.  Match all clips to this look "
-                    "as closely as possible while adapting to each clip's exposure."
-                )
+    frames = _export_timeline_frames(project, timeline, str(out_dir))
+    if not frames:
+        return "No frames exported — ensure video track 1 has clips."
 
-            prompt = AUTO_GRADE_PROMPT.format(
-                num_clips=len(frames),
-                style=style,
-                reference_section=reference_section,
-                clip_names_json=json.dumps(clip_names),
-            )
+    lines: list[str] = [
+        f"Timeline: {tl_name}  |  {len(frames)} clips  |  {fps} fps",
+        f"Frames: {out_dir}",
+        "",
+    ]
 
-            image_parts = _build_image_parts(frames, reference_image_path)
+    for f in frames:
+        item = f["item"]
+        start = item.GetStart()
+        end = item.GetEnd()
+        duration_sec = round((end - start) / fps, 1)
+        start_tc = _frames_to_tc(start, fps)
+        end_tc = _frames_to_tc(end, fps)
 
-            response = retry_gemini(
-                client.models.generate_content,
-                model=MODEL,
-                contents=image_parts + [types.Part.from_text(text=prompt)],
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                ),
-            )
+        node_count = 0
+        with contextlib.suppress(Exception):
+            ng = item.GetNodeGraph()
+            if ng:
+                node_count = ng.GetNumNodes()
 
-            decoder = json.JSONDecoder()
-            grades, _ = decoder.raw_decode(response.text.strip())
+        lines.append(
+            f"  Clip {f['clip_index']}: {f['clip_name']}\n"
+            f"    Frame: {f['frame_path']}\n"
+            f"    TC: {start_tc} - {end_tc}  ({duration_sec}s)\n"
+            f"    Nodes: {node_count}"
+        )
 
-            if not isinstance(grades, list):
-                return f"Gemini returned unexpected format: {response.text[:300]}"
-
-            applied = 0
-            rationales: list[str] = []
-            for grade in grades:
-                idx = int(grade.get("clip_index", 0))
-                match = next((f for f in frames if f["clip_index"] == idx), None)
-                if match and _apply_cdl_to_item(match["item"], grade, node_label="AI Grade"):
-                    applied += 1
-                    rationale = grade.get("rationale", "")
-                    if rationale:
-                        rationales.append(f"  {idx}. {match['clip_name']}: {rationale}")
-
-            summary = f"Applied '{style}' grade to {applied}/{len(frames)} clips."
-            if rationales:
-                summary += "\n" + "\n".join(rationales[:10])
-            return summary
-
-        finally:
-            shutil.rmtree(tmpdir, ignore_errors=True)
-
-    # Sync for small timelines, background for large.
-    items = timeline.GetItemListInTrack("video", 1) or []
-    if len(items) <= 15:
-        try:
-            return _run_grade()
-        except Exception as exc:
-            return f"Error during grading: {exc}"
-
-    entry: dict = {"result": None, "error": None, "thread": None}
-    _color_results[result_key] = entry
-
-    def _bg():
-        try:
-            entry["result"] = _run_grade()
-        except Exception as exc:
-            entry["error"] = str(exc)
-
-    t = threading.Thread(target=_bg, daemon=True)
-    entry["thread"] = t
-    t.start()
-    return (
-        f"AI grading running in background for '{tl_name}' ({len(items)} clips). "
-        "Re-call resolve_auto_grade() to retrieve the result."
+    lines.append("")
+    lines.append(
+        "Review each frame with the Read tool.  Then grade each clip:\n"
+        "  1. resolve_node_add_serial  (to preserve existing grades)\n"
+        "  2. resolve_set_cdl  (Slope/Offset/Power/Saturation)"
     )
+
+    return "\n".join(lines)
 
 
 # ---------------------------------------------------------------------------
@@ -571,15 +515,16 @@ def resolve_auto_broll_status() -> str:
 
 @mcp.tool
 def resolve_check_grade_consistency(apply_fixes: str = "false") -> str:
-    """Audit color grade consistency across all clips on the current timeline.
+    """QC step: audit grade consistency across the current timeline using Gemini.
 
-    Exports one frame per clip, sends the batch to Gemini for analysis, and
-    returns a detailed consistency report with per-clip issues.
+    Call this **after** grading is complete.  Exports one frame per clip, sends
+    the batch to Gemini for visual consistency analysis, and returns a detailed
+    report with per-clip issues and suggested CDL corrections.
 
     *apply_fixes*: ``"true"`` to auto-apply Gemini's suggested CDL corrections
     on a new node.  ``"false"`` (default) for report only.
 
-    Clips ≤ 15: runs synchronously.  Clips > 15: runs in background — re-call
+    Clips <= 15: runs synchronously.  Clips > 15: runs in background — re-call
     to retrieve the result.
     """
     if client is None:

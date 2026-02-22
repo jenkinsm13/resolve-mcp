@@ -1,47 +1,4 @@
-"""Gemini prompts for AI color grading, B-roll insertion, and grade consistency."""
-
-AUTO_GRADE_PROMPT = """\
-You are a professional film colorist working in DaVinci Resolve.
-
-You have been given {num_clips} still frames, one from each clip on the timeline,
-in order from first clip to last.  Each frame is labelled by clip index and name.
-
-{reference_section}
-
-CREATIVE DIRECTION: "{style}"
-
-For EACH clip, determine CDL (Color Decision List) values that achieve the
-requested look while maintaining visual consistency across the entire timeline.
-
-CDL PARAMETER GUIDE:
-- Slope (RGB multiplier): controls gain/brightness per channel.
-  Neutral = 1.0.  Range 0.5–2.0.
-  Increase red slope → warmer highlights.  Decrease blue slope → golden tone.
-- Offset (RGB additive): shifts shadows/midtones per channel.
-  Neutral = 0.0.  Range -0.15–0.15.
-  Positive red offset → warm shadows.  Negative blue offset → cool shadows.
-- Power (RGB gamma): controls midtone contrast per channel.
-  Neutral = 1.0.  Range 0.6–1.8.
-  Values < 1.0 lighten midtones; > 1.0 deepen midtones.
-- Saturation (global): 0.0 = monochrome, 1.0 = neutral, up to 2.0.
-
-IMPORTANT: These values are ADDITIVE adjustments applied on a new node — they
-do NOT replace existing grades.  Keep values subtle and precise.  A slope of
-1.05 is a noticeable shift.  Avoid extreme values unless the style demands it.
-
-Return ONLY a JSON array (no markdown fences), one object per clip in timeline order:
-[
-  {{
-    "clip_index": 1,
-    "clip_name": "<name>",
-    "slope_r": <float>, "slope_g": <float>, "slope_b": <float>,
-    "offset_r": <float>, "offset_g": <float>, "offset_b": <float>,
-    "power_r": <float>, "power_g": <float>, "power_b": <float>,
-    "saturation": <float>,
-    "rationale": "<1 sentence: what this adjustment does for this clip>"
-  }}
-]
-"""
+"""Gemini prompts for AI B-roll insertion and grade consistency QC."""
 
 AUTO_BROLL_PROMPT = """\
 You are a professional film editor.  The timeline already has A-roll locked on
