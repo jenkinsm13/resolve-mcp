@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.env
+.venv/
+venv/
+.DS_Store
+*.gemini.mp4
+.ingest_progress.json
+.build_progress.json
+.resolve_build_progress.json
+uv.lock

@@ -1,0 +1,43 @@
+[project]
+name = "resolve-mcp"
+version = "0.1.0"
+description = "MCP server with 215+ tools for DaVinci Resolve scripting API (v20.3)"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+keywords = [
+    "davinci-resolve", "mcp", "model-context-protocol", "video-editing",
+    "resolve-api", "color-grading", "timeline", "media-pool", "render",
+    "fusion", "fairlight", "ai-editing", "claude", "llm-tools",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "fastmcp[cli]>=3.0.0",
+    "google-genai>=1.64.0",
+    "opentimelineio>=0.18.1",
+    "otio-fcp-adapter>=1.0.0",
+    "pydantic>=2.0",
+    "python-dotenv>=1.2.1",
+]
+
+[project.scripts]
+resolve-mcp = "resolve_mcp:main"
+
+[project.urls]
+Homepage = "https://github.com/jenkinsm13/resolve-mcp"
+Repository = "https://github.com/jenkinsm13/resolve-mcp"
+Issues = "https://github.com/jenkinsm13/resolve-mcp/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
