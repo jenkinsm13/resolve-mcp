@@ -111,6 +111,92 @@ Get a free Gemini API key at [aistudio.google.com](https://aistudio.google.com/)
 
 ---
 
+## Using Both Servers Together — resolve-mcp + resolve-assistant
+
+`resolve-mcp` gives you **215+ tools for direct DaVinci Resolve control** — projects, timelines, editing, color grading, rendering, Fusion, Fairlight, and more.
+
+**[resolve-assistant](https://github.com/jenkinsm13/resolve-assistant)** is a separate MCP server that adds **AI-powered automatic editing** — point it at a folder of footage and give it an editing instruction, and it uses Google Gemini to watch every frame, plan the edit, and build the timeline in Resolve automatically.
+
+**They are independent MCP servers.** You can use either one alone, or both together for the complete AI video editing toolkit. When used together, you get full manual control over Resolve (resolve-mcp) plus AI-driven footage analysis and automatic timeline building (resolve-assistant).
+
+### Install Both With One Command
+
+```bash
+# Install resolve-mcp with the AI editing assistant included
+pip install resolve-mcp[assistant]
+
+# Or install them separately
+pip install resolve-mcp
+pip install resolve-assistant
+```
+
+### Configure Both Servers
+
+Because they are **two separate MCP servers**, each needs its own entry in your Claude Desktop or Claude Code config. Here is the complete configuration with both servers:
+
+**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS, `%APPDATA%\Claude\claude_desktop_config.json` on Windows, `~/.config/Claude/claude_desktop_config.json` on Linux):
+
+```json
+{
+  "mcpServers": {
+    "resolve-mcp": {
+      "command": "uvx",
+      "args": ["resolve-mcp"],
+      "env": {
+        "GEMINI_API_KEY": "your-gemini-api-key-here"
+      }
+    },
+    "resolve-assistant": {
+      "command": "uvx",
+      "args": ["resolve-assistant"],
+      "env": {
+        "GEMINI_API_KEY": "your-gemini-api-key-here"
+      }
+    }
+  }
+}
+```
+
+**Claude Code** (`.mcp.json` in your project root):
+
+```json
+{
+  "mcpServers": {
+    "resolve-mcp": {
+      "command": "uvx",
+      "args": ["resolve-mcp"],
+      "env": {
+        "GEMINI_API_KEY": "your-gemini-api-key-here"
+      }
+    },
+    "resolve-assistant": {
+      "command": "uvx",
+      "args": ["resolve-assistant"],
+      "env": {
+        "GEMINI_API_KEY": "your-gemini-api-key-here"
+      }
+    }
+  }
+}
+```
+
+> **Note:** `GEMINI_API_KEY` is optional for resolve-mcp (only the 3 AI bridge tools need it) but **required** for resolve-assistant. Both servers use the same Gemini API key.
+
+### Which Server Do I Need?
+
+| Use Case | resolve-mcp | resolve-assistant | Both |
+|----------|:-----------:|:-----------------:|:----:|
+| Control Resolve via AI (projects, timelines, editing, rendering) | Yes | | |
+| Color grading, Fusion, Fairlight, node graphs | Yes | | |
+| AI footage analysis — watch every frame, transcribe speech, tag content | | Yes | |
+| AI automatic editing — give an instruction, get a timeline | | Yes | |
+| Full AI video editing pipeline with manual Resolve control | | | Yes |
+| AI timeline critique + marker-driven editing | Yes | | |
+
+For more about the AI editing assistant, see the **[resolve-assistant documentation](https://github.com/jenkinsm13/resolve-assistant)**.
+
+---
+
 ## Tool Categories
 
 ### Project Management (10 tools)
@@ -402,7 +488,7 @@ The server connects to Resolve over the network scripting interface, which must 
 
 ## Related Projects
 
-- **[resolve-assistant](https://github.com/jenkinsm13/resolve-assistant)** — AI editing assistant that uses Gemini to analyze footage, plan edits, and build timelines automatically
+- **[resolve-assistant](https://github.com/jenkinsm13/resolve-assistant)** — AI-powered video editing assistant that uses Google Gemini to analyze footage, plan professional edits, and build timelines in DaVinci Resolve automatically. Install alongside resolve-mcp with `pip install resolve-mcp[assistant]` for the complete AI video editing toolkit.
 - **[FastMCP](https://github.com/jlowin/fastmcp)** — The MCP framework powering this server
 - **[Model Context Protocol](https://modelcontextprotocol.io)** — The open protocol for AI tool use
 
@@ -420,4 +506,4 @@ Contributions welcome! Please open an issue or PR on [GitHub](https://github.com
 
 ---
 
-*Built for video editors, colorists, and post-production professionals who want to control DaVinci Resolve with AI. Works with Claude Desktop, Claude Code, Cursor, Windsurf, ChatGPT, and any MCP-compatible client.*
+*Built for video editors, colorists, and post-production professionals who want to control DaVinci Resolve with AI. Works with Claude Desktop, Claude Code, Cursor, Windsurf, ChatGPT, and any MCP-compatible client. Pair with [resolve-assistant](https://github.com/jenkinsm13/resolve-assistant) for AI-powered automatic editing.*
