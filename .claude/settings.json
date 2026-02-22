@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '\\.env\"|\\.env$'; then echo 'BLOCKED: Do not edit .env files — they contain API keys' >&2; exit 1; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -oE '\"file_path\":\\s*\"[^\"]+\\.py\"' | head -1 | sed 's/.*\"\\([^\"]*\\.py\\)\"/\\1/'); if [ -n \"$FILE\" ] && command -v pyright >/dev/null 2>&1; then pyright \"$FILE\" 2>&1 | tail -5; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
