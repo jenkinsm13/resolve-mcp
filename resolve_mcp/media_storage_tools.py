@@ -5,13 +5,16 @@ Covers: MediaStorage object — browsing mounted volumes, listing files
 at paths, and importing from storage locations into the media pool.
 """
 
+import json
+from typing import Optional
+
 from .config import mcp
-from .resolve import _boilerplate, get_resolve
+from .resolve import get_resolve, _boilerplate
+
 
 # ---------------------------------------------------------------------------
 # MCP Tools
 # ---------------------------------------------------------------------------
-
 
 @mcp.tool
 def resolve_list_volumes() -> str:
@@ -93,7 +96,6 @@ def resolve_add_from_storage(file_paths: str, target_bin: str = "") -> str:
     if target_bin:
         _, _, media_pool = _boilerplate()
         from .resolve import _find_bin
-
         folder = _find_bin(media_pool.GetRootFolder(), target_bin)
         if folder:
             media_pool.SetCurrentFolder(folder)

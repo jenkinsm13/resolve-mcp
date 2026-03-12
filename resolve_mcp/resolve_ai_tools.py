@@ -7,16 +7,12 @@ import threading
 from pathlib import Path
 
 from .config import MODEL, client, log, mcp
-from .media import load_sidecars
-from .prompts import MARKER_EDIT_PROMPT_TEMPLATE, TIMELINE_CRITIQUE_PROMPT_TEMPLATE
-from .resolve import _boilerplate, _collect_clips_recursive
-from .resolve_build import build_timeline_direct, markers_to_slots, read_timeline_markers
 from .retry import retry_gemini
+from .resolve import _boilerplate, _collect_clips_recursive
+from .resolve_build import build_timeline_direct, read_timeline_markers, markers_to_slots
+from .media import load_sidecars
+from .prompts import TIMELINE_CRITIQUE_PROMPT_TEMPLATE, MARKER_EDIT_PROMPT_TEMPLATE
 from .timeline import upload_media_for_editing
-
-# Background critique results keyed by timeline name.
-# Populated by background threads, consumed on re-call.
-_critique_results: dict[str, dict] = {}
 
 
 @mcp.tool
@@ -65,12 +61,10 @@ def resolve_add_markers(folder_path: str) -> str:
             alt = note.get("alternative", "")
             custom_data = json.dumps({"alt": alt[:200]}) if alt else ""
             timeline.AddMarker(
-                frame_id,
-                colors[i % len(colors)],
+                frame_id, colors[i % len(colors)],
                 f"[{i + 1}] Edit Note",
                 note.get("decision", "")[:255],
-                1,
-                custom_data,
+                1, custom_data,
             )
             added += 1
         except Exception as exc:
@@ -92,7 +86,6 @@ def resolve_analyze_timeline() -> str:
     if client is None:
         return "Error: GEMINI_API_KEY not set. This tool requires Gemini."
     from google.genai import types
-
     try:
         resolve, project, media_pool = _boilerplate()
     except ValueError as e:
@@ -103,39 +96,25 @@ def resolve_analyze_timeline() -> str:
         return "Error: No active timeline in Resolve."
 
     tl_name = timeline.GetName()
-
-    # Check for a previously launched background critique result.
-    if tl_name in _critique_results:
-        entry = _critique_results[tl_name]
-        if entry.get("result"):
-            result = entry["result"]
-            del _critique_results[tl_name]
-            return result
-        if entry.get("error"):
-            error = entry["error"]
-            del _critique_results[tl_name]
-            return f"Error during critique: {error}"
-        if entry.get("thread") and entry["thread"].is_alive():
-            return f"Critique still running for '{tl_name}'…"
-        # Thread finished but no result/error — stale entry, clean up and re-run.
-        del _critique_results[tl_name]
+    try:
+        fps = float(timeline.GetSetting("timelineFrameRate"))
+    except Exception:
+        fps = 24.0
 
     clip_info: list[dict] = []
     for track_num in (1, 2):
-        for item in timeline.GetItemListInTrack("video", track_num) or []:
+        for item in (timeline.GetItemListInTrack("video", track_num) or []):
             try:
                 pool_item = item.GetMediaPoolItem()
                 if pool_item is None:
                     continue
                 fp = pool_item.GetClipProperty("File Path")
-                clip_info.append(
-                    {
-                        "track": track_num,
-                        "source_file": fp,
-                        "start_frame": item.GetStart(),
-                        "end_frame": item.GetEnd(),
-                    }
-                )
+                clip_info.append({
+                    "track": track_num,
+                    "source_file": fp,
+                    "start_frame": item.GetStart(),
+                    "end_frame": item.GetEnd(),
+                })
             except Exception:
                 continue
 
@@ -174,18 +153,15 @@ def resolve_analyze_timeline() -> str:
         except Exception as exc:
             return f"Error during critique: {exc}"
 
-    entry: dict = {"result": None, "error": None, "thread": None}
-    _critique_results[tl_name] = entry
+    result_holder: dict = {"result": None, "error": None}
 
     def _bg():
         try:
-            entry["result"] = _run_critique()
+            result_holder["result"] = _run_critique()
         except Exception as exc:
-            entry["error"] = str(exc)
+            result_holder["error"] = str(exc)
 
-    t = threading.Thread(target=_bg, daemon=True)
-    entry["thread"] = t
-    t.start()
+    threading.Thread(target=_bg, daemon=True).start()
     return (
         f"Critique running in background for '{tl_name}' ({len(clip_info)} clips). "
         "Re-call resolve_analyze_timeline() to retrieve the result."
@@ -207,7 +183,6 @@ def resolve_build_from_markers(instruction: str, footage_folder: str = "") -> st
     if client is None:
         return "Error: GEMINI_API_KEY not set. This tool requires Gemini."
     from google.genai import types
-
     try:
         resolve, project, media_pool = _boilerplate()
     except ValueError as e:
@@ -220,7 +195,8 @@ def resolve_build_from_markers(instruction: str, footage_folder: str = "") -> st
     markers = read_timeline_markers(timeline)
     if not markers:
         return (
-            "No markers found on the active timeline. Add paired same-color markers to define cut slots, then re-run."
+            "No markers found on the active timeline. "
+            "Add paired same-color markers to define cut slots, then re-run."
         )
 
     slots = markers_to_slots(markers)
@@ -266,7 +242,8 @@ def resolve_build_from_markers(instruction: str, footage_folder: str = "") -> st
 
     tl_name = timeline.GetName()
     color_summary = ", ".join(
-        f"{c}×{sum(1 for s in slots if s['color'] == c)}" for c in dict.fromkeys(s["color"] for s in slots)
+        f"{c}×{sum(1 for s in slots if s['color']==c)}"
+        for c in dict.fromkeys(s["color"] for s in slots)
     )
     log.info("Marker build: %d slots (%s), %d sidecars", len(slots), color_summary, len(sidecars))
 
@@ -309,9 +286,16 @@ def resolve_build_from_markers(instruction: str, footage_folder: str = "") -> st
         first_sidecar_path = Path(sidecars[0].get("file_path", ""))
         if first_sidecar_path.parent.is_dir():
             safe = edit_plan.get("timeline_name", "Marker_Edit").replace(":", " -").replace("/", "-")
-            (first_sidecar_path.parent / f"{safe}.edl.json").write_text(json.dumps(edit_plan, indent=2))
+            (first_sidecar_path.parent / f"{safe}.edl.json").write_text(
+                json.dumps(edit_plan, indent=2)
+            )
     except Exception:
         pass
 
-    track_map_desc = "Blue→V1" + "".join(f", {s['color']}→V{s['track']}" for s in slots if s["color"] != "Blue")
-    return f"Marker build from '{tl_name}': {len(slots)} slots ({color_summary}), {track_map_desc}. {msg}"
+    track_map_desc = "Blue→V1" + "".join(
+        f", {s['color']}→V{s['track']}" for s in slots if s["color"] != "Blue"
+    )
+    return (
+        f"Marker build from '{tl_name}': {len(slots)} slots ({color_summary}), "
+        f"{track_map_desc}. {msg}"
+    )

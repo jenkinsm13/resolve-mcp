@@ -12,11 +12,10 @@ Registered resources:
   resolve://version     — Resolve version and edition (Free vs Studio)
 """
 
-import contextlib
 import json
 
 from .config import mcp
-from .resolve import _boilerplate, _enumerate_bins, get_resolve, is_studio
+from .resolve import get_resolve, _boilerplate, _enumerate_bins, is_studio
 
 
 @mcp.resource("resolve://version")
@@ -26,16 +25,15 @@ def resource_version() -> str:
     if not resolve:
         return json.dumps({"error": "DaVinci Resolve is not running."})
     ver = "unknown"
-    with contextlib.suppress(AttributeError, TypeError):
+    try:
         ver = resolve.GetVersionString() or ver
-    return json.dumps(
-        {
-            "version": ver,
-            "studio": is_studio(),
-            "page": resolve.GetCurrentPage() or "unknown",
-        },
-        indent=2,
-    )
+    except (AttributeError, TypeError):
+        pass
+    return json.dumps({
+        "version": ver,
+        "studio": is_studio(),
+        "page": resolve.GetCurrentPage() or "unknown",
+    }, indent=2)
 
 
 @mcp.resource("resolve://project")
@@ -46,14 +44,9 @@ def resource_project() -> str:
     except ValueError as exc:
         return json.dumps({"error": str(exc)})
     settings = {}
-    for key in (
-        "timelineFrameRate",
-        "timelineResolutionWidth",
-        "timelineResolutionHeight",
-        "videoBitDepth",
-        "videoMonitorFormat",
-        "timelinePlaybackFrameRate",
-    ):
+    for key in ("timelineFrameRate", "timelineResolutionWidth",
+                "timelineResolutionHeight", "videoBitDepth",
+                "videoMonitorFormat", "timelinePlaybackFrameRate"):
         try:
             val = project.GetSetting(key)
             if val is not None:
@@ -62,15 +55,12 @@ def resource_project() -> str:
             pass
     tl_count = project.GetTimelineCount() or 0
     current_tl = project.GetCurrentTimeline()
-    return json.dumps(
-        {
-            "name": project.GetName(),
-            "timeline_count": tl_count,
-            "current_timeline": current_tl.GetName() if current_tl else None,
-            "settings": settings,
-        },
-        indent=2,
-    )
+    return json.dumps({
+        "name": project.GetName(),
+        "timeline_count": tl_count,
+        "current_timeline": current_tl.GetName() if current_tl else None,
+        "settings": settings,
+    }, indent=2)
 
 
 @mcp.resource("resolve://timelines")
@@ -127,7 +117,8 @@ def resource_render_queue() -> str:
     result = []
     for job in jobs:
         entry = {}
-        for k in ("JobId", "TimelineName", "TargetDir", "OutputFilename", "RenderStatus", "CompletionPercentage"):
+        for k in ("JobId", "TimelineName", "TargetDir", "OutputFilename",
+                   "RenderStatus", "CompletionPercentage"):
             if k in job:
                 entry[k] = job[k]
         result.append(entry)

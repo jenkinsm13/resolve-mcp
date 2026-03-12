@@ -18,10 +18,10 @@ def _pm():
 
 # ---------------------------------------------------------------------------
 
-
 @mcp.tool
 @safe_resolve_call
-def resolve_archive_project(project_name: str, archive_path: str, with_stills_and_luts: bool = True) -> str:
+def resolve_archive_project(project_name: str, archive_path: str,
+                             with_stills_and_luts: bool = True) -> str:
     """Archive a project to a .dra file.
 
     Args:
@@ -31,7 +31,8 @@ def resolve_archive_project(project_name: str, archive_path: str, with_stills_an
     """
     pm = _pm()
     r = pm.ArchiveProject(project_name, archive_path, with_stills_and_luts)
-    return f"Archived '{project_name}' → {archive_path}" if r else f"Archive failed for '{project_name}'."
+    return f"Archived '{project_name}' → {archive_path}" if r \
+        else f"Archive failed for '{project_name}'."
 
 
 @mcp.tool
@@ -46,7 +47,8 @@ def resolve_delete_project(project_name: str) -> str:
     """
     pm = _pm()
     r = pm.DeleteProject(project_name)
-    return f"Deleted project '{project_name}'." if r else f"Delete failed for '{project_name}'."
+    return f"Deleted project '{project_name}'." if r \
+        else f"Delete failed for '{project_name}'."
 
 
 @mcp.tool
@@ -65,7 +67,8 @@ def resolve_import_project(file_path: str, project_name: str = "") -> str:
         r = pm.ImportProject(file_path, project_name)
     else:
         r = pm.ImportProject(file_path)
-    return f"Imported project from {file_path}" if r else f"Import failed for {file_path}."
+    return f"Imported project from {file_path}" if r \
+        else f"Import failed for {file_path}."
 
 
 @mcp.tool
@@ -82,7 +85,8 @@ def resolve_restore_project(archive_path: str, project_name: str = "") -> str:
         r = pm.RestoreProject(archive_path, project_name)
     else:
         r = pm.RestoreProject(archive_path)
-    return f"Restored project from {archive_path}" if r else f"Restore failed for {archive_path}."
+    return f"Restored project from {archive_path}" if r \
+        else f"Restore failed for {archive_path}."
 
 
 @mcp.tool
@@ -95,7 +99,8 @@ def resolve_create_db_folder(folder_name: str) -> str:
     """
     pm = _pm()
     r = pm.CreateFolder(folder_name)
-    return f"Created DB folder '{folder_name}'." if r else f"Failed to create DB folder '{folder_name}'."
+    return f"Created DB folder '{folder_name}'." if r \
+        else f"Failed to create DB folder '{folder_name}'."
 
 
 @mcp.tool
@@ -110,7 +115,8 @@ def resolve_delete_db_folder(folder_name: str) -> str:
     """
     pm = _pm()
     r = pm.DeleteFolder(folder_name)
-    return f"Deleted DB folder '{folder_name}'." if r else f"Failed to delete DB folder '{folder_name}'."
+    return f"Deleted DB folder '{folder_name}'." if r \
+        else f"Failed to delete DB folder '{folder_name}'."
 
 
 @mcp.tool
@@ -169,7 +175,6 @@ def resolve_set_current_database(db_info: str) -> str:
         db_info (str): JSON string with database connection info, or plain database name.
     """
     import json
-
     pm = _pm()
     try:
         info = json.loads(db_info)
@@ -177,4 +182,4 @@ def resolve_set_current_database(db_info: str) -> str:
         # Treat as plain DB name
         info = {"DbName": db_info}
     r = pm.SetCurrentDatabase(info)
-    return "Switched database." if r else "Failed to switch database."
+    return f"Switched database." if r else "Failed to switch database."

@@ -6,14 +6,15 @@ Project settings, Resolve page navigation, and version info.
 """
 
 import json
+from typing import Optional
 
 from .config import mcp
-from .resolve import _boilerplate, get_resolve
+from .resolve import get_resolve, _boilerplate
+
 
 # ---------------------------------------------------------------------------
 # MCP Tools
 # ---------------------------------------------------------------------------
-
 
 @mcp.tool
 def resolve_list_projects() -> str:
@@ -82,21 +83,8 @@ def resolve_create_project(project_name: str) -> str:
 
 
 @mcp.tool
-def resolve_rename_project(new_name: str) -> str:
-    """Rename the current project.
-
-    Returns success/failure message.
-    """
-    _, project, _ = _boilerplate()
-    old_name = project.GetName()
-    result = project.SetName(new_name)
-    if result:
-        return f"Renamed project '{old_name}' → '{new_name}'."
-    return f"Failed to rename project. Name '{new_name}' may already exist or be invalid."
-
-
-@mcp.tool
-def resolve_export_project(project_name: str, file_path: str, with_stills_and_luts: bool = True) -> str:
+def resolve_export_project(project_name: str, file_path: str,
+                           with_stills_and_luts: bool = True) -> str:
     """Export a project to a .drp file at the given path.
 
     Set *with_stills_and_luts* to False to exclude gallery stills and LUTs.

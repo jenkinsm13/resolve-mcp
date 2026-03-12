@@ -6,21 +6,20 @@ import json
 import threading
 import time
 from pathlib import Path
+from typing import Optional
 
 from google.genai import types
 
-from .config import AUDIO_EXTS, MODEL, client, log
-from .ffprobe import ffprobe_duration, ffprobe_fps
+from .config import MODEL, AUDIO_EXTS, client, log
+from .retry import retry_gemini
+from .schemas import VideoSidecar, AudioSidecar
+from .ffprobe import ffprobe_fps, ffprobe_duration
+from .transcode import prepare_for_gemini
 from .media import (
-    list_all_audio,
-    list_all_videos,
-    list_pending_audio,
-    list_pending_videos,
+    list_all_videos, list_all_audio,
+    list_pending_videos, list_pending_audio,
 )
 from .prompts import ANALYSIS_PROMPT, AUDIO_ANALYSIS_PROMPT
-from .retry import retry_gemini
-from .schemas import AudioSidecar, VideoSidecar
-from .transcode import prepare_for_gemini
 
 _PROGRESS_FILENAME = ".ingest_progress.json"
 
@@ -32,7 +31,7 @@ def _write_progress(root: Path, data: dict) -> None:
     (root / _PROGRESS_FILENAME).write_text(json.dumps(data, indent=2))
 
 
-def _read_progress(root: Path) -> dict | None:
+def _read_progress(root: Path) -> Optional[dict]:
     pf = root / _PROGRESS_FILENAME
     if not pf.exists():
         return None
@@ -42,7 +41,7 @@ def _read_progress(root: Path) -> dict | None:
         return None
 
 
-def _ingest_worker(root: Path, build_instruction: str | None = None) -> None:
+def _ingest_worker(root: Path, build_instruction: Optional[str] = None) -> None:
     """Background thread: process all pending media files sequentially.
 
     If *build_instruction* is provided, a timeline build is automatically
@@ -60,34 +59,22 @@ def _ingest_worker(root: Path, build_instruction: str | None = None) -> None:
         is_audio = media_path.suffix.lower() in AUDIO_EXTS
 
         step = "uploading" if is_audio else "transcoding"
-        _write_progress(
-            root,
-            {
-                "status": "running",
-                "current_file": media_path.name,
-                "current_step": step,
-                "completed": already_done + i,
-                "total": total,
-                "errors": errors,
-            },
-        )
+        _write_progress(root, {
+            "status": "running", "current_file": media_path.name,
+            "current_step": step, "completed": already_done + i,
+            "total": total, "errors": errors,
+        })
 
         try:
             if is_audio:
                 upload_path = media_path
             else:
                 upload_path = prepare_for_gemini(media_path)
-                _write_progress(
-                    root,
-                    {
-                        "status": "running",
-                        "current_file": media_path.name,
-                        "current_step": "uploading",
-                        "completed": already_done + i,
-                        "total": total,
-                        "errors": errors,
-                    },
-                )
+                _write_progress(root, {
+                    "status": "running", "current_file": media_path.name,
+                    "current_step": "uploading", "completed": already_done + i,
+                    "total": total, "errors": errors,
+                })
 
             file_ref = retry_gemini(client.files.upload, file=str(upload_path))
             while file_ref.state.name == "PROCESSING":
@@ -98,22 +85,15 @@ def _ingest_worker(root: Path, build_instruction: str | None = None) -> None:
                 errors.append(f"{media_path.name}: upload state={file_ref.state.name}")
                 continue
 
-            _write_progress(
-                root,
-                {
-                    "status": "running",
-                    "current_file": media_path.name,
-                    "current_step": "analyzing",
-                    "completed": already_done + i,
-                    "total": total,
-                    "errors": errors,
-                },
-            )
+            _write_progress(root, {
+                "status": "running", "current_file": media_path.name,
+                "current_step": "analyzing", "completed": already_done + i,
+                "total": total, "errors": errors,
+            })
 
             if is_audio:
                 response = retry_gemini(
-                    client.models.generate_content,
-                    model=MODEL,
+                    client.models.generate_content, model=MODEL,
                     contents=[file_ref, AUDIO_ANALYSIS_PROMPT],
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
@@ -122,8 +102,7 @@ def _ingest_worker(root: Path, build_instruction: str | None = None) -> None:
                 )
             else:
                 response = retry_gemini(
-                    client.models.generate_content,
-                    model=MODEL,
+                    client.models.generate_content, model=MODEL,
                     contents=[file_ref, ANALYSIS_PROMPT],
                     config=types.GenerateContentConfig(
                         media_resolution=types.MediaResolution.MEDIA_RESOLUTION_HIGH,
@@ -151,27 +130,14 @@ def _ingest_worker(root: Path, build_instruction: str | None = None) -> None:
             errors.append(f"{media_path.name}: {exc}")
 
     done_count = total - len(list_pending_videos(root)) - len(list_pending_audio(root))
-    _write_progress(
-        root,
-        {
-            "status": "complete",
-            "current_file": None,
-            "current_step": None,
-            "completed": done_count,
-            "total": total,
-            "errors": errors,
-        },
-    )
+    _write_progress(root, {
+        "status": "complete", "current_file": None, "current_step": None,
+        "completed": done_count, "total": total, "errors": errors,
+    })
 
     if build_instruction:
         try:
             from .build import _build_worker  # lazy import avoids circular dep
-            from .media import load_sidecars
-
-            sidecars = load_sidecars(root)
-            if sidecars:
-                _build_worker(root, sidecars, build_instruction)
-            else:
-                log.error("Auto-build skipped: no sidecars found in %s", root)
+            _build_worker(root, build_instruction)
         except Exception as exc:
             log.error("Auto-build after ingest failed: %s", exc)

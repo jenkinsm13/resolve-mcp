@@ -4,6 +4,7 @@ scene cut detection, frame queries, DRX grade application, and IDs.
 """
 
 import json
+from typing import Optional
 
 from .config import mcp
 from .errors import safe_resolve_call
@@ -19,10 +20,10 @@ def _tl(project):
 
 # ---------------------------------------------------------------------------
 
-
 @mcp.tool
 @safe_resolve_call
-def resolve_insert_generator(generator_name: str, duration: float = 5.0, track_index: int = 1) -> str:
+def resolve_insert_generator(generator_name: str, duration: float = 5.0,
+                              track_index: int = 1) -> str:
     """Insert a built-in generator into the timeline (bars, black, color, etc.).
 
     *generator_name*: e.g. '10 Step', 'Grey Scale', 'Color Bars', 'Black',
@@ -37,14 +38,18 @@ def resolve_insert_generator(generator_name: str, duration: float = 5.0, track_i
     _, project, _ = _boilerplate()
     tl = _tl(project)
     fps = float(tl.GetSetting("timelineFrameRate") or 24)
-    info = {"generatorName": generator_name, "duration": round(duration * fps), "trackIndex": track_index}
+    info = {"generatorName": generator_name,
+            "duration": round(duration * fps),
+            "trackIndex": track_index}
     r = tl.InsertGeneratorIntoTimeline(info)
-    return f"Generator '{generator_name}' inserted ({duration}s)." if r else "Failed — check generator name."
+    return f"Generator '{generator_name}' inserted ({duration}s)." if r \
+        else f"Failed — check generator name."
 
 
 @mcp.tool
 @safe_resolve_call
-def resolve_insert_title(title_name: str, duration: float = 5.0, track_index: int = 1) -> str:
+def resolve_insert_title(title_name: str, duration: float = 5.0,
+                          track_index: int = 1) -> str:
     """Insert a title/text template into the timeline.
 
     *title_name*: e.g. 'Text+', 'Lower Third', 'Scroll', etc.
@@ -57,14 +62,17 @@ def resolve_insert_title(title_name: str, duration: float = 5.0, track_index: in
     _, project, _ = _boilerplate()
     tl = _tl(project)
     fps = float(tl.GetSetting("timelineFrameRate") or 24)
-    info = {"templateName": title_name, "duration": round(duration * fps), "trackIndex": track_index}
+    info = {"templateName": title_name,
+            "duration": round(duration * fps),
+            "trackIndex": track_index}
     r = tl.InsertTitleIntoTimeline(info)
     return f"Title '{title_name}' inserted." if r else "Failed."
 
 
 @mcp.tool
 @safe_resolve_call
-def resolve_insert_fusion_title(title_name: str, duration: float = 5.0, track_index: int = 1) -> str:
+def resolve_insert_fusion_title(title_name: str, duration: float = 5.0,
+                                 track_index: int = 1) -> str:
     """Insert a Fusion-based title template.
 
     Args:
@@ -75,14 +83,17 @@ def resolve_insert_fusion_title(title_name: str, duration: float = 5.0, track_in
     _, project, _ = _boilerplate()
     tl = _tl(project)
     fps = float(tl.GetSetting("timelineFrameRate") or 24)
-    info = {"templateName": title_name, "duration": round(duration * fps), "trackIndex": track_index}
+    info = {"templateName": title_name,
+            "duration": round(duration * fps),
+            "trackIndex": track_index}
     r = tl.InsertFusionTitleIntoTimeline(info)
     return f"Fusion title '{title_name}' inserted." if r else "Failed."
 
 
 @mcp.tool
 @safe_resolve_call
-def resolve_insert_fusion_generator(generator_name: str, duration: float = 5.0, track_index: int = 1) -> str:
+def resolve_insert_fusion_generator(generator_name: str, duration: float = 5.0,
+                                     track_index: int = 1) -> str:
     """Insert a Fusion-based generator.
 
     Args:
@@ -93,14 +104,17 @@ def resolve_insert_fusion_generator(generator_name: str, duration: float = 5.0, 
     _, project, _ = _boilerplate()
     tl = _tl(project)
     fps = float(tl.GetSetting("timelineFrameRate") or 24)
-    info = {"generatorName": generator_name, "duration": round(duration * fps), "trackIndex": track_index}
+    info = {"generatorName": generator_name,
+            "duration": round(duration * fps),
+            "trackIndex": track_index}
     r = tl.InsertFusionGeneratorIntoTimeline(info)
     return f"Fusion generator '{generator_name}' inserted." if r else "Failed."
 
 
 @mcp.tool
 @safe_resolve_call
-def resolve_insert_fusion_composition(track_index: int = 1, duration: float = 5.0) -> str:
+def resolve_insert_fusion_composition(track_index: int = 1,
+                                       duration: float = 5.0) -> str:
     """Insert an empty Fusion composition into the timeline.
 
     Args:
@@ -117,9 +131,9 @@ def resolve_insert_fusion_composition(track_index: int = 1, duration: float = 5.
 
 @mcp.tool
 @safe_resolve_call
-def resolve_insert_ofx_generator(
-    generator_name: str, plugin_id: str, duration: float = 5.0, track_index: int = 1
-) -> str:
+def resolve_insert_ofx_generator(generator_name: str, plugin_id: str,
+                                  duration: float = 5.0,
+                                  track_index: int = 1) -> str:
     """Insert an OFX plugin generator into the timeline.
 
     *plugin_id*: the OFX plugin identifier string.
@@ -133,14 +147,12 @@ def resolve_insert_ofx_generator(
     _, project, _ = _boilerplate()
     tl = _tl(project)
     fps = float(tl.GetSetting("timelineFrameRate") or 24)
-    info = {
-        "generatorName": generator_name,
-        "pluginId": plugin_id,
-        "duration": round(duration * fps),
-        "trackIndex": track_index,
-    }
+    info = {"generatorName": generator_name,
+            "pluginId": plugin_id,
+            "duration": round(duration * fps),
+            "trackIndex": track_index}
     r = tl.InsertOFXGeneratorIntoTimeline(info)
-    return "OFX generator inserted." if r else "Failed."
+    return f"OFX generator inserted." if r else "Failed."
 
 
 @mcp.tool
@@ -154,7 +166,8 @@ def resolve_detect_scene_cuts() -> str:
     tl = _tl(project)
     r = tl.DetectSceneCuts()
     if r and isinstance(r, list):
-        return f"{len(r)} scene cut(s) detected:\n" + "\n".join(f"  frame {f}" for f in r[:50])
+        return f"{len(r)} scene cut(s) detected:\n" + \
+            "\n".join(f"  frame {f}" for f in r[:50])
     return "Scene detection returned no results or failed."
 
 
@@ -174,7 +187,9 @@ def resolve_get_timeline_frame_range() -> str:
 
 @mcp.tool
 @safe_resolve_call
-def resolve_apply_drx_grade(drx_path: str, track_type: str = "video", track_index: int = 1, item_index: int = 0) -> str:
+def resolve_apply_drx_grade(drx_path: str, track_type: str = "video",
+                             track_index: int = 1,
+                             item_index: int = 0) -> str:
     """Apply a saved .drx grade file to timeline clips.
 
     If *item_index* is 0, applies to all items on the track.
@@ -225,7 +240,8 @@ def resolve_get_timeline_id() -> str:
 
 @mcp.tool
 @safe_resolve_call
-def resolve_import_into_timeline(file_path: str, import_options: str = "{}") -> str:
+def resolve_import_into_timeline(file_path: str,
+                                  import_options: str = "{}") -> str:
     """Import media directly into the current timeline.
 
     *import_options*: JSON with keys like autoImportSourceClipsIntoMediaPool,
@@ -241,5 +257,6 @@ def resolve_import_into_timeline(file_path: str, import_options: str = "{}") -> 
         opts = json.loads(import_options)
     except json.JSONDecodeError:
         opts = {}
-    r = tl.ImportIntoTimeline(file_path, opts) if opts else tl.ImportIntoTimeline(file_path)
+    r = tl.ImportIntoTimeline(file_path, opts) if opts \
+        else tl.ImportIntoTimeline(file_path)
     return f"Imported into timeline from {file_path}" if r else "Import failed."

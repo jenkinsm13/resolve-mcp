@@ -23,10 +23,10 @@ def _item(project, track_type, track_index, item_index):
 
 # ---------------------------------------------------------------------------
 
-
 @mcp.tool
 @safe_resolve_call
-def resolve_item_list_fusion_comps(track_type: str, track_index: int, item_index: int) -> str:
+def resolve_item_list_fusion_comps(track_type: str, track_index: int,
+                                    item_index: int) -> str:
     """List all Fusion compositions on a timeline item.
 
     Args:
@@ -47,7 +47,8 @@ def resolve_item_list_fusion_comps(track_type: str, track_index: int, item_index
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_add_fusion_comp(track_type: str, track_index: int, item_index: int) -> str:
+def resolve_item_add_fusion_comp(track_type: str, track_index: int,
+                                  item_index: int) -> str:
     """Create a new Fusion composition on a timeline item.
 
     Args:
@@ -65,7 +66,9 @@ def resolve_item_add_fusion_comp(track_type: str, track_index: int, item_index: 
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_import_fusion_comp(track_type: str, track_index: int, item_index: int, file_path: str) -> str:
+def resolve_item_import_fusion_comp(track_type: str, track_index: int,
+                                     item_index: int,
+                                     file_path: str) -> str:
     """Import a Fusion composition from a .comp file.
 
     Args:
@@ -84,9 +87,9 @@ def resolve_item_import_fusion_comp(track_type: str, track_index: int, item_inde
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_export_fusion_comp(
-    track_type: str, track_index: int, item_index: int, comp_name: str, file_path: str
-) -> str:
+def resolve_item_export_fusion_comp(track_type: str, track_index: int,
+                                     item_index: int, comp_name: str,
+                                     file_path: str) -> str:
     """Export a Fusion composition to a .comp file.
 
     Args:
@@ -106,7 +109,9 @@ def resolve_item_export_fusion_comp(
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_delete_fusion_comp(track_type: str, track_index: int, item_index: int, comp_name: str) -> str:
+def resolve_item_delete_fusion_comp(track_type: str, track_index: int,
+                                     item_index: int,
+                                     comp_name: str) -> str:
     """Delete a Fusion composition by name.
 
     Args:
@@ -125,7 +130,9 @@ def resolve_item_delete_fusion_comp(track_type: str, track_index: int, item_inde
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_load_fusion_comp(track_type: str, track_index: int, item_index: int, comp_name: str) -> str:
+def resolve_item_load_fusion_comp(track_type: str, track_index: int,
+                                   item_index: int,
+                                   comp_name: str) -> str:
     """Load/select a Fusion composition by name.
 
     Args:
@@ -144,9 +151,9 @@ def resolve_item_load_fusion_comp(track_type: str, track_index: int, item_index:
 
 @mcp.tool
 @safe_resolve_call
-def resolve_item_rename_fusion_comp(
-    track_type: str, track_index: int, item_index: int, old_name: str, new_name: str
-) -> str:
+def resolve_item_rename_fusion_comp(track_type: str, track_index: int,
+                                     item_index: int, old_name: str,
+                                     new_name: str) -> str:
     """Rename a Fusion composition.
 
     Args:

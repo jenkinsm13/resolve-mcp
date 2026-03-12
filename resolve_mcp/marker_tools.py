@@ -5,13 +5,16 @@ Covers: Timeline markers (add, delete, list, update custom data),
 playhead position (get/set timecode), and marker-based queries.
 """
 
+import json
+from typing import Optional
+
 from .config import mcp
 from .resolve import _boilerplate
+
 
 # ---------------------------------------------------------------------------
 # MCP Tools
 # ---------------------------------------------------------------------------
-
 
 @mcp.tool
 def resolve_list_markers(target: str = "timeline") -> str:
@@ -57,9 +60,10 @@ def resolve_list_markers(target: str = "timeline") -> str:
 
 
 @mcp.tool
-def resolve_add_marker_at(
-    seconds: float, color: str = "Blue", name: str = "", note: str = "", duration: int = 1, custom_data: str = ""
-) -> str:
+def resolve_add_marker_at(seconds: float, color: str = "Blue",
+                           name: str = "", note: str = "",
+                           duration: int = 1,
+                           custom_data: str = "") -> str:
     """Add a marker to the current timeline at a specific time.
 
     *seconds*: position in seconds from timeline start.
@@ -171,24 +175,6 @@ def resolve_get_marker_data(seconds: float) -> str:
     if data:
         return f"Custom data at frame {frame}: {data}"
     return f"No custom data on marker at frame {frame}."
-
-
-@mcp.tool
-def resolve_delete_marker_by_custom_data(custom_data: str) -> str:
-    """Delete a timeline marker identified by its custom data string.
-
-    *custom_data*: the exact custom data string that identifies the marker.
-
-    See also: resolve_update_marker_data, resolve_delete_markers
-    """
-    _, project, _ = _boilerplate()
-    tl = project.GetCurrentTimeline()
-    if not tl:
-        return "No active timeline."
-    result = tl.DeleteMarkerByCustomData(custom_data)
-    if result:
-        return "Marker deleted."
-    return "No marker with that custom data found."
 
 
 @mcp.tool
