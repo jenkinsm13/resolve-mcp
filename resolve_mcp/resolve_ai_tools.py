@@ -1,18 +1,20 @@
 """
-Resolve AI tools: marker placement, timeline critique, and marker-driven builds.
+Resolve AI tools: marker placement, timeline critique, video critique, and marker-driven builds.
 """
 
 import json
+import time
 import threading
 from pathlib import Path
 
-from .config import MODEL, client, log, mcp
+from .config import MODEL, VIDEO_EXTS, client, log, mcp
 from .retry import retry_gemini
 from .resolve import _boilerplate, _collect_clips_recursive
 from .resolve_build import build_timeline_direct, read_timeline_markers, markers_to_slots
 from .media import load_sidecars
 from .prompts import TIMELINE_CRITIQUE_PROMPT_TEMPLATE, MARKER_EDIT_PROMPT_TEMPLATE
 from .timeline import upload_media_for_editing
+from .transcode import prepare_for_gemini
 
 
 @mcp.tool
@@ -166,6 +168,84 @@ def resolve_analyze_timeline() -> str:
         f"Critique running in background for '{tl_name}' ({len(clip_info)} clips). "
         "Re-call resolve_analyze_timeline() to retrieve the result."
     )
+
+
+VIDEO_CRITIQUE_PROMPT = """\
+You are a Senior Film Editor reviewing a finished video export.
+
+Video: "{video_name}"
+
+WATCH the entire video carefully. Provide a detailed editorial critique:
+1. PACING — Too fast/slow? Which specific moments drag or rush?
+2. STORY ARC — Clear beginning/middle/end? Does it build effectively?
+3. SHOT SELECTION — Any weak shots that should be replaced? Strongest moments to keep?
+4. FLOW — Any jarring cuts or mismatched energy between shots?
+5. MUSIC/AUDIO SYNC — Does the edit respect the audio rhythm? Any missed beat-sync opportunities?
+6. TECHNICAL — Any visible issues (flash frames, jump cuts, bad transitions, color mismatches)?
+7. FIXES — 3-5 concrete recommendations with approximate timecodes (MM:SS).
+8. OVERALL GRADE — Score 1-10 with explanation.
+"""
+
+
+@mcp.tool
+def resolve_critique_video(video_path: str) -> str:
+    """
+    Send a finished video file to Gemini for editorial critique.
+
+    Does NOT require DaVinci Resolve to be running. Accepts any video file
+    (MP4, MOV, etc.), transcodes to a Gemini-safe proxy if needed (using
+    GPU NVENC on Windows), uploads it, and returns Gemini's critique.
+    """
+    if client is None:
+        return "Error: GEMINI_API_KEY not set. This tool requires Gemini."
+    from google.genai import types
+
+    path = Path(video_path).resolve()
+    if not path.exists():
+        return f"Error: File not found: {video_path}"
+    if path.suffix.lower() not in VIDEO_EXTS:
+        return f"Error: Not a video file: {path.suffix}"
+
+    # Prepare for Gemini (NVENC transcode if needed, otherwise pass through)
+    try:
+        upload_path = prepare_for_gemini(path)
+    except RuntimeError as exc:
+        return f"Transcode error: {exc}"
+
+    log.info("Uploading %s (%.0f MB) to Gemini...", upload_path.name, upload_path.stat().st_size / 1e6)
+    try:
+        # Upload: no retries — large file uploads shouldn't retry with backoff
+        ref = client.files.upload(file=str(upload_path))
+        log.info("Upload complete, state=%s — waiting for processing...", ref.state.name)
+        polls = 0
+        while ref.state.name == "PROCESSING":
+            time.sleep(2)
+            ref = client.files.get(name=ref.name)
+            polls += 1
+            if polls > 60:  # 2 min max wait for processing
+                return "Error: Gemini processing timed out after 2 minutes."
+        if ref.state.name != "ACTIVE":
+            return f"Error: Upload ended in state {ref.state.name}"
+        log.info("File ACTIVE — requesting critique...")
+    except Exception as exc:
+        return f"Upload error: {exc}"
+
+    prompt = VIDEO_CRITIQUE_PROMPT.format(video_name=path.name)
+    try:
+        # Critique: use retry (API calls are cheap to retry, unlike uploads)
+        response = retry_gemini(
+            client.models.generate_content,
+            model=MODEL,
+            contents=[ref, prompt],
+            config=types.GenerateContentConfig(
+                media_resolution=types.MediaResolution.MEDIA_RESOLUTION_HIGH,
+            ),
+            max_retries=2,
+            base_delay=3.0,
+        )
+        return response.text
+    except Exception as exc:
+        return f"Gemini critique error: {exc}"
 
 
 @mcp.tool

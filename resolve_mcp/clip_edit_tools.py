@@ -1,10 +1,11 @@
-"""Clip editing tools: set properties, enable/disable, color, delete, link, compound, stabilize."""
+"""Clip editing tools: set properties, enable/disable, color, delete, link, compound, stabilize, speed ramp."""
 
 import json
 
 from .config import mcp
 from .resolve import _boilerplate
 from .clip_query_tools import _get_item
+from .resolve_transforms import _apply_speed_ramp
 
 
 @mcp.tool
@@ -151,3 +152,69 @@ def resolve_smart_reframe(track_type: str, track_index: int, item_index: int) ->
     except ValueError as e:
         return str(e)
     return f"Smart Reframe applied to clip {item_index}." if item.SmartReframe() else "Smart Reframe failed. Requires Resolve Studio."
+
+
+@mcp.tool
+def resolve_speed_ramp(track_type: str, track_index: int, item_index: int,
+                       speed_points_json: str) -> str:
+    """Apply a speed ramp to a timeline clip via a Fusion TimeStretcher.
+
+    Creates a Fusion composition on the clip with a TimeStretcher node
+    whose SourceTime input is keyframed to produce variable speed.
+
+    *speed_points_json*: JSON array of control points, each with:
+      - ``t_sec`` (float): time in seconds from clip start
+      - ``speed`` (float): playback speed at this point (1.0 = normal, 2.0 = 2× fast, 0.5 = half speed)
+
+    Speed is linearly interpolated between control points. The last
+    control point's ``t_sec`` should match the clip duration.
+
+    Example — gradual ramp up then snap back::
+
+        [
+            {"t_sec": 0.0, "speed": 1.0},
+            {"t_sec": 5.0, "speed": 8.0},
+            {"t_sec": 5.5, "speed": 8.0},
+            {"t_sec": 5.6, "speed": 1.0},
+            {"t_sec": 6.5, "speed": 1.0}
+        ]
+
+    Warning: the clip must have enough source handle for the total source
+    frames consumed. Higher speeds consume more source. Check source
+    availability with resolve_get_item_properties (left/right offset).
+    """
+    _, project, _ = _boilerplate()
+    try:
+        tl, item = _get_item(project, track_type, track_index, item_index)
+    except ValueError as e:
+        return str(e)
+
+    try:
+        points = json.loads(speed_points_json)
+    except json.JSONDecodeError as exc:
+        return f"Invalid JSON: {exc}"
+
+    if not isinstance(points, list) or len(points) < 2:
+        return "speed_points_json must be a JSON array with at least 2 control points."
+
+    for i, pt in enumerate(points):
+        if "t_sec" not in pt or "speed" not in pt:
+            return f"Control point {i} missing 't_sec' or 'speed' key."
+        if pt["speed"] <= 0:
+            return f"Control point {i}: speed must be > 0."
+
+    fps_str = tl.GetSetting("timelineFrameRate")
+    try:
+        fps = float(fps_str)
+    except (TypeError, ValueError):
+        return f"Could not determine timeline frame rate (got '{fps_str}')."
+
+    if _apply_speed_ramp(item, points, fps):
+        dur = item.GetDuration()
+        n_pts = len(points)
+        speeds = [f"{p['speed']}x@{p['t_sec']:.1f}s" for p in points]
+        return (f"Speed ramp applied to clip {item_index} on {track_type} track {track_index}. "
+                f"{n_pts} control points, {dur} frames at {fps}fps. "
+                f"Curve: {', '.join(speeds)}")
+    return ("Speed ramp failed. Possible causes: clip already has a Fusion comp "
+            "that blocked creation, or TimeStretcher tool not available.")
