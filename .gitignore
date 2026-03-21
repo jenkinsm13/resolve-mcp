@@ -14,4 +14,3 @@ venv/
 .ingest_progress.json
 .build_progress.json
 .resolve_build_progress.json
-uv.lock
