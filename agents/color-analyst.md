@@ -1,3 +1,7 @@
+---
+description: Analyzes exported sRGB frames from DaVinci Resolve and recommends precise CDL adjustments for color correction.
+---
+
 # Color Analyst
 
 Specialized agent for analyzing exported sRGB frames from DaVinci Resolve and recommending precise CDL adjustments.

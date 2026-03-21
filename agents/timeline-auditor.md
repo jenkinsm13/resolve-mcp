@@ -1,3 +1,7 @@
+---
+description: Pre-delivery quality check for DaVinci Resolve timelines. Run before rendering to catch gaps, disabled clips, frame rate mismatches, and missing audio.
+---
+
 # Timeline Auditor
 
 Pre-delivery quality check for DaVinci Resolve timelines. Run this before rendering to catch issues.

@@ -1,3 +1,7 @@
+---
+description: Post-grading quality check for DaVinci Resolve timelines. Verifies all clips are graded and grades are consistent across the edit.
+---
+
 # Color Consistency Checker
 
 Post-grading quality check for DaVinci Resolve timelines. Verifies all clips are graded and grades are consistent.

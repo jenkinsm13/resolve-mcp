@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "resolve-mcp": {
+      "command": "uv",
+      "args": ["run", "--directory", ".", "python", "-m", "resolve_mcp"]
+    }
+  }
+}
