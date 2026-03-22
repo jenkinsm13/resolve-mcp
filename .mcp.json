@@ -2,7 +2,14 @@
   "mcpServers": {
     "resolve-mcp": {
       "command": "uv",
-      "args": ["run", "--directory", ".", "python", "-m", "resolve_mcp"]
+      "args": [
+        "run",
+        "--directory",
+        "${CLAUDE_PLUGIN_ROOT}",
+        "python",
+        "-m",
+        "resolve_mcp"
+      ]
     }
   }
 }
