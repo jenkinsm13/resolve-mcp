@@ -9,8 +9,9 @@ from .resolve_transforms import _apply_speed_ramp
 
 
 @mcp.tool
-def resolve_set_item_properties(track_type: str, track_index: int,
-                                 item_index: int, properties_json: str) -> str:
+def resolve_set_item_properties(
+    track_type: str, track_index: int, item_index: int, properties_json: str
+) -> str:
     """Set properties on a timeline item.
 
     *properties_json*: JSON object with property names and values.
@@ -27,13 +28,17 @@ def resolve_set_item_properties(track_type: str, track_index: int,
         props = json.loads(properties_json)
     except json.JSONDecodeError as exc:
         return f"Invalid JSON: {exc}"
-    results = [f"  {k}={v}: {'OK' if item.SetProperty(k, v) else 'FAILED'}" for k, v in props.items()]
+    results = [
+        f"  {k}={v}: {'OK' if item.SetProperty(k, v) else 'FAILED'}"
+        for k, v in props.items()
+    ]
     return "Property updates:\n" + "\n".join(results)
 
 
 @mcp.tool
-def resolve_set_clip_enabled(track_type: str, track_index: int,
-                              item_index: int, enabled: bool = True) -> str:
+def resolve_set_clip_enabled(
+    track_type: str, track_index: int, item_index: int, enabled: bool = True
+) -> str:
     """Enable or disable a clip on the timeline."""
     _, project, _ = _boilerplate()
     try:
@@ -41,12 +46,17 @@ def resolve_set_clip_enabled(track_type: str, track_index: int,
     except ValueError as e:
         return str(e)
     state = "enabled" if enabled else "disabled"
-    return f"Clip {item_index} on {track_type} track {track_index} {state}." if item.SetClipEnabled(enabled) else f"Failed to set clip {state}."
+    return (
+        f"Clip {item_index} on {track_type} track {track_index} {state}."
+        if item.SetClipEnabled(enabled)
+        else f"Failed to set clip {state}."
+    )
 
 
 @mcp.tool
-def resolve_set_clip_color_on_timeline(track_type: str, track_index: int,
-                                        item_index: int, color: str) -> str:
+def resolve_set_clip_color_on_timeline(
+    track_type: str, track_index: int, item_index: int, color: str
+) -> str:
     """Set the color tag of a clip on the timeline.
 
     Valid colors: Orange, Apricot, Yellow, Lime, Olive, Green, Teal, Navy,
@@ -57,12 +67,17 @@ def resolve_set_clip_color_on_timeline(track_type: str, track_index: int,
         _, item = _get_item(project, track_type, track_index, item_index)
     except ValueError as e:
         return str(e)
-    return f"Set color '{color}' on clip {item_index}." if item.SetClipColor(color) else f"Failed to set color '{color}'."
+    return (
+        f"Set color '{color}' on clip {item_index}."
+        if item.SetClipColor(color)
+        else f"Failed to set color '{color}'."
+    )
 
 
 @mcp.tool
-def resolve_delete_clips_from_timeline(track_type: str, track_index: int,
-                                        item_indices: str, ripple: bool = False) -> str:
+def resolve_delete_clips_from_timeline(
+    track_type: str, track_index: int, item_indices: str, ripple: bool = False
+) -> str:
     """Delete clips from the timeline.
 
     *item_indices*: comma-separated 1-based indices (e.g. '1,3,5').
@@ -90,8 +105,9 @@ def resolve_delete_clips_from_timeline(track_type: str, track_index: int,
 
 
 @mcp.tool
-def resolve_link_clips(track_type: str, track_index: int,
-                        item_indices: str, linked: bool = True) -> str:
+def resolve_link_clips(
+    track_type: str, track_index: int, item_indices: str, linked: bool = True
+) -> str:
     """Link or unlink clips on the timeline.
 
     *item_indices*: comma-separated 1-based indices to link together.
@@ -108,12 +124,17 @@ def resolve_link_clips(track_type: str, track_index: int,
     if len(selected) < 2:
         return "Need at least 2 valid items to link/unlink."
     action = "linked" if linked else "unlinked"
-    return f"{len(selected)} clips {action}." if tl.SetClipsLinked(selected, linked) else f"Failed to {action[:-2]} clips."
+    return (
+        f"{len(selected)} clips {action}."
+        if tl.SetClipsLinked(selected, linked)
+        else f"Failed to {action[:-2]} clips."
+    )
 
 
 @mcp.tool
-def resolve_create_compound_clip(track_type: str, track_index: int,
-                                  item_indices: str, name: str = "Compound Clip") -> str:
+def resolve_create_compound_clip(
+    track_type: str, track_index: int, item_indices: str, name: str = "Compound Clip"
+) -> str:
     """Create a compound clip from selected items on a track.
 
     *item_indices*: comma-separated 1-based indices.
@@ -129,18 +150,51 @@ def resolve_create_compound_clip(track_type: str, track_index: int,
     selected = [items[i - 1] for i in indices if 1 <= i <= len(items)]
     if not selected:
         return "No valid items selected."
-    return f"Created compound clip '{name}' from {len(selected)} items." if tl.CreateCompoundClip(selected, {"name": name}) else "Failed to create compound clip."
+    return (
+        f"Created compound clip '{name}' from {len(selected)} items."
+        if tl.CreateCompoundClip(selected, {"name": name})
+        else "Failed to create compound clip."
+    )
 
 
 @mcp.tool
-def resolve_stabilize_clip(track_type: str, track_index: int, item_index: int) -> str:
-    """Apply stabilization to a clip on the timeline. Requires Resolve Studio."""
+def resolve_stabilize_clip(
+    track_type: str,
+    track_index: int,
+    item_index: int,
+    mode: str = "",
+) -> str:
+    """Apply stabilization to a clip on the timeline. Requires Resolve Studio.
+
+    *mode*: optional — 'Perspective', 'Similarity', or 'Translation'. Best-effort:
+    Resolve's scripting API (as of 20.3.2) does NOT expose stabilization mode,
+    so the Inspector's current mode is used regardless. When a future Resolve
+    build exposes the property we try SetProperty here as well so the tool
+    upgrades automatically.
+    """
     _, project, _ = _boilerplate()
     try:
         _, item = _get_item(project, track_type, track_index, item_index)
     except ValueError as e:
         return str(e)
-    return f"Stabilization applied to clip {item_index}." if item.Stabilize() else "Stabilization failed. Requires Resolve Studio."
+    mode_note = ""
+    if mode:
+        enum_map = {"perspective": 0, "similarity": 1, "translation": 2}
+        want = enum_map.get(mode.lower())
+        applied = False
+        for key in ("StabilizationMethod", "StabilizationMode", "Stabilization Mode"):
+            if want is not None and item.SetProperty(key, want):
+                applied = True
+                break
+            if item.SetProperty(key, mode):
+                applied = True
+                break
+        mode_note = f" (mode='{mode}' {'set' if applied else 'NOT SETTABLE via API — set in Inspector'})"
+    return (
+        f"Stabilization applied to clip {item_index}.{mode_note}"
+        if item.Stabilize()
+        else "Stabilization failed. Requires Resolve Studio."
+    )
 
 
 @mcp.tool
