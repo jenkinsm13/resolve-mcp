@@ -55,6 +55,11 @@ mcp = FastMCP(
 
 VIDEO_EXTS = {".mp4", ".mov", ".mxf", ".avi", ".webm", ".mkv", ".r3d", ".braw"}
 AUDIO_EXTS = {".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a"}
+IMAGE_EXTS = {
+    ".nef", ".dng", ".arw", ".cr2", ".cr3", ".orf", ".raf", ".rw2",
+    ".jpg", ".jpeg", ".tif", ".tiff", ".png", ".heic", ".heif",
+    ".pef", ".srw", ".3fr", ".exr", ".dpx",
+}
 GEMINI_MAX_BYTES = 2 * 1024 * 1024 * 1024  # 2 GB Files API ceiling
 SAFE_CODECS = {"h264", "avc", "avc1", "hevc", "h265", "hev1"}
 GEMINI_MAX_LONG_EDGE = 1280

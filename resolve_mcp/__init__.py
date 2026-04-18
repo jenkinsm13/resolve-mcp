@@ -36,6 +36,10 @@ from . import layout_preset_tools # noqa: F401  — layouts/burn-in/render prese
 from . import dolby_stereo_tools  # noqa: F401  — Dolby Vision & 3D stereo (4 tools)
 from . import folder_tools        # noqa: F401  — bin transcription/export/IDs (4 tools)
 
+# --- Photo tools (Resolve 21+) ---
+from . import photo_tools           # noqa: F401  — Photo page navigation & album import (4 tools)
+from . import photo_raw_tools       # noqa: F401  — Clip properties, metadata, flags (8 tools)
+
 # --- AI bridge tools (require GEMINI_API_KEY) ---
 from . import resolve_tools       # noqa: F401  — AI-driven Resolve tools (9 tools)
 
